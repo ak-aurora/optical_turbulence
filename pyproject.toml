@@ -1,7 +1,7 @@
 [project]
-name = "optical-turbulence"
+name = "optical_turbulence"
 version = "0.1.0"
-description = "Add your description here"
+description = "Optical turbulence expressions"
 readme = "README.md"
 authors = [
     { name = "Agustin Gonzalez", email = "agustin.gonzalez@fresnel.fr" }
