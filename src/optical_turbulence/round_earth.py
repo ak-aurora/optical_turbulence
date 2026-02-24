@@ -17,7 +17,6 @@ EARTH_RADIUS = 6371e3 # [m]
 
 #region Utilities
 
-# TODO: add "-1" to LCT altitude?
 def get_link_distance(sat_altitude: real_t, zenith_angle: real_t, lct_altitude: real_t = 0) -> np.float64:
     """Get the link distance ($L$) between the satellite and the laser communication terminal.
 
@@ -32,7 +31,7 @@ def get_link_distance(sat_altitude: real_t, zenith_angle: real_t, lct_altitude: 
     Returns:
         np.float64: link distance between LCT and SAT [m]
     """
-    # TODO: add auto lct_altitude for array
+    
     if (lct_altitude < 0) or (sat_altitude < 0):
         raise ValueError(f"Altitudes have to be positive. LCT alt: {lct_altitude:.2e} | SAT alt: {sat_altitude:.2e}")
 
@@ -46,8 +45,7 @@ def get_link_distance(sat_altitude: real_t, zenith_angle: real_t, lct_altitude: 
     return left_term + np.sqrt( right_term_1 + right_term_2 )
 
 
-# TODO: add "-1" to LCT altitude?
-def get_altitude_from_distance[T: real_t | real_array_t](distance: T, zenith_angle: real_t, lct_distance: real_t = 0) -> T:
+def get_altitude_from_distance[T: real_t | real_array_t](distance: T, zenith_angle: real_t, lct_distance: real_t = -1) -> T:
     """From a distance in the round-earth model, get an altitude.
 
     Args:
@@ -58,7 +56,19 @@ def get_altitude_from_distance[T: real_t | real_array_t](distance: T, zenith_ang
     Returns:
         real_t or real_array_t: altitude to the corresponding round-earth-model distance [m].
     """
-    # TODO: add auto lct_distance for array
+    
+    if (np.min(distance) < 0):
+        raise ValueError(f"Distances have to be positive. Minimum distance: {np.min(distance):.2e}")
+
+    if lct_distance == -1:
+        if isinstance(distance, np.ndarray):
+            lct_distance = np.min(distance)
+        else: 
+            lct_distance = 0
+
+    if (lct_distance > np.min(distance)):
+        raise ValueError("LCT Distance has to be less than the distances to calculate altitude.")
+
     lct_altitude = lct_distance * np.cos(zenith_angle)
 
     sq_term1 = np.pow(EARTH_RADIUS + lct_altitude, 2) + np.pow(distance - lct_distance, 2)
@@ -75,7 +85,7 @@ def get_distance_from_altitude[T: real_t | real_array_t](altitude: T, zenith_ang
         sat_altitude (real_t or real_array_t): Satellite altitude from sea level [m]
         zenith_angle (real_t): Zenith angle between the LCT and SAT [rad]
         lct_altitude (real_t, optional): altitude of the lct w.r.t sea level. Defaults to -1. If the value is -1, then \
-            LCT distance is calculated as the minimum of the altitude array or as the mean between 0 and altitude.
+            LCT distance is calculated as the minimum of the altitude array or set as 0.
         
     Raises:
         ValueError: the altitudes are not physically valid.
@@ -85,19 +95,19 @@ def get_distance_from_altitude[T: real_t | real_array_t](altitude: T, zenith_ang
     """
 
     if (np.min(altitude) < 0):
-        raise ValueError(f"Altitudes have to be positive. LCT alt: {lct_altitude:.2e} | Altitude: {altitude:.2e}")
+        raise ValueError(f"Altitudes have to be positive. Minimum altitude: {np.min(altitude):.2e}")
 
     if lct_altitude == -1:
         if isinstance(altitude, np.ndarray):
             lct_altitude = np.min(altitude)
-        else: # TODO: set at zero instead of the mean
-            lct_altitude = altitude / 2
+        else:
+            lct_altitude = 0
 
     if (lct_altitude > np.min(altitude)):
         raise ValueError("LCT Altitude has to be less than the altitudes to calculate altitude.")
     
-    left_term = -np.cos(zenith_angle) * (EARTH_RADIUS + lct_altitude)
-    right_term_1 = np.pow(np.cos(zenith_angle) * (EARTH_RADIUS + lct_altitude), 2) + lct_altitude / np.cos(zenith_angle)
+    left_term = -np.cos(zenith_angle) * (EARTH_RADIUS + lct_altitude) + lct_altitude / np.cos(zenith_angle)
+    right_term_1 = np.pow(np.cos(zenith_angle) * (EARTH_RADIUS + lct_altitude), 2)
     right_term_2 = (altitude - lct_altitude) * (2 * EARTH_RADIUS + altitude + lct_altitude)
     
     return left_term + np.sqrt( right_term_1 + right_term_2 )
@@ -265,6 +275,67 @@ def fried_parameter_DL(wavelength: real_t, zenith_angle: real_t, distance: real_
 #endregion DOWNLINK
 
 #region UPLINK
+
+
+@warn_not_tested
+def isonoplanatic_angle_UL(wavelength: real_t, \
+                            zenith_angle: real_t, \
+                            distance: real_array_t, \
+                            ris_model: Callable[[real_array_t], real_array_t],
+                            Lambda: real_t,
+                            Theta: real_t,
+                            neg_Theta: real_t,
+                            **_) \
+                            -> np.float64:
+    """Calculate the isoplanatic angle of an **uplink gaussian-beam wave**.
+
+    Note:
+        This function is for a flat-earth model
+        Also known as $\\sigma_{Bu}$
+
+    Args:
+        wavelength (real_t): wavelength of the beam sent [m]
+        zenith_angle (real_t): zenith angle of the link [rad]
+        distance (real_array_t): array with distances that cover the SATCOM link [m]
+        ris_model (callable[[real_array_t], real_array_t]): callable of the refractive-index \
+            structure model that only has one parameter: an array of altitudes [m^{-2/3}].
+        Lambda (real_t): diffractive parameter of the beam at the receiver plane [unitless]
+        Theta (real_t): refractive parameter of the beam at the receiver plane [unitless]
+        neg_Theta (real_t): overbar refractive parameter of the beam at the receiver plane [unitless] (1 - Theta)
+
+    Returns:
+        out (np.float64): the isoplanatic angle for the uplink gaussian beam wave [rad].
+
+    Source
+        Andrews, Larry C. Laser Beam Propagation Through Random Media, \
+            2nd ed. Press Monograph Series, v. PM152. SPIE, 2005. p. 493
+
+    """
+    
+    # pre calculate
+    lct_distance = np.min(distance)
+    link_distance = np.max(distance) - lct_distance
+    altitude = get_altitude_from_distance(distance=distance, zenith_angle=zenith_angle, lct_distance=lct_distance)
+    
+    wavenumber_sq = np.pow( 2 * np.pi / wavelength, 2)
+
+    mu_frac = (distance - lct_distance) / link_distance
+
+    mu1u = integrate.simpson(ris_model(altitude) * 
+        np.pow( Theta - neg_Theta * mu_frac , 5/3 ),
+        distance
+    )
+
+    mu2u = integrate.simpson(ris_model(altitude)* 
+        np.pow( 1 - mu_frac, 5/3 ),
+        distance
+    )
+
+    outside_pow = np.pow( link_distance, -1 )
+    inside_pow = 2.91 * wavenumber_sq * (mu1u + 0.62 * mu2u * np.pow( Lambda, 11/6 ))
+    pow_term = np.pow( inside_pow, -3/5 )
+
+    return outside_pow * pow_term
 
 
 def fried_parameter_UL_TX(wavelength: real_t, zenith_angle: real_t, distance: real_array_t, ris_model: Callable[[real_array_t], real_array_t], **_) -> np.float64:

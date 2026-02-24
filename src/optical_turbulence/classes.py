@@ -3,6 +3,7 @@ Classes to facilitate the use of the library
 """
 
 from dataclasses import dataclass
+import warnings
 from ._definitions import real_t
 from typing import Dict
 import numpy as np
@@ -129,7 +130,17 @@ class OpticalBeam:
 
     
     def as_dict(self) -> Dict:
-        
+        """ Return all properties and attributes of this class a dictionary
+        to be used in **kwargs.
+
+        Returns
+            dict: the dictionary with keys and values.
+        """
+
+        if self.link_distance <= 0:
+            warnings.warn(f"OpticalBeam instance has an invalid link distance.\
+                Link distance: {self.link_distance}")
+
         if self._params_changed or self._dic is None:
             self._dic = {prop: getattr(self, prop) for prop in dir(self) if not (prop.startswith('_') or callable(getattr(self, prop, None)))}
             self._params_changed = False

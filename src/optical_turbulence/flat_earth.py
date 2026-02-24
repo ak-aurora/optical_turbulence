@@ -11,6 +11,33 @@ from typing import Callable
 
 # ----------------- FUNCTIONS DEFINITIONS ----------------- #
 
+# region Utilities
+
+def get_link_distance(sat_altitude: real_t, zenith_angle: real_t, lct_altitude: real_t = 0) -> np.float64:
+    """Get the link distance ($L$) between the satellite and the laser communication terminal.
+
+    Args:
+        sat_altitude (real_t): Satellite altitude from sea level [m]
+        zenith_angle (real_t): Zenith angle between the LCT and SAT [rad]
+        lct_altitude (real_t, optional): Laser Communication Terminal altitude from sea level [m]. Default value: 0 m.
+
+    Raises:
+        ValueError: the altitudes are not physically valid.
+
+    Returns:
+        np.float64: link distance between LCT and SAT [m]
+    """
+
+    if (lct_altitude < 0) or (sat_altitude < 0):
+        raise ValueError(f"Altitudes have to be positive. LCT alt: {lct_altitude:.2e} | SAT alt: {sat_altitude:.2e}")
+
+    if (lct_altitude >= sat_altitude):
+        raise ValueError("LCT Altitude has to be less than the satellite altitude.")
+
+    link_distance = (sat_altitude - lct_altitude) / np.cos(zenith_angle)
+
+    return link_distance
+
 #region DOWNLINK
 
 def scint_index_DL_PR_weak(wavelength: real_t, \
@@ -166,6 +193,68 @@ def fried_parameter_DL(wavelength: real_t, zenith_angle: real_t, altitude: real_
 #endregion DOWNLINK
 
 #region UPLINK
+
+
+@warn_not_tested
+def isonoplanatic_angle_UL(wavelength: real_t, \
+                            zenith_angle: real_t, \
+                            altitude: real_array_t, \
+                            ris_model: Callable[[real_array_t], real_array_t],
+                            Lambda: real_t,
+                            Theta: real_t,
+                            neg_Theta: real_t,
+                            **_) \
+                            -> np.float64:
+    """Calculate the isoplanatic angle of an **uplink gaussian-beam wave**.
+
+    Note:
+        This function is for a flat-earth model
+        Also known as $\\sigma_{Bu}$
+
+    Args:
+        wavelength (real_t): wavelength of the beam sent [m]
+        zenith_angle (real_t): zenith angle of the link [rad]
+        altitude (real_array_t): array with altitudes that cover the SATCOM link [m]
+        ris_model (callable[[real_array_t], real_array_t]): callable of the refractive-index \
+            structure model that only has one parameter: an array of altitudes [m^{-2/3}].
+        Lambda (real_t): diffractive parameter of the beam at the receiver plane [unitless]
+        Theta (real_t): refractive parameter of the beam at the receiver plane [unitless]
+        neg_Theta (real_t): overbar refractive parameter of the beam at the receiver plane [unitless] (1 - Theta)
+
+    Returns:
+        out (np.float64): the isoplanatic angle for the uplink gaussian beam wave [rad].
+
+    Source
+        Andrews, Larry C. Laser Beam Propagation Through Random Media, \
+            2nd ed. Press Monograph Series, v. PM152. SPIE, 2005. p. 493
+
+    """
+    
+    # pre calculate
+    lct_altitude = np.min(altitude)
+    sat_altitude = np.max(altitude)
+    link_len = sat_altitude - lct_altitude
+    wavenumber_sq = np.pow( 2 * np.pi / wavelength, 2)
+
+    mu_frac = (altitude - lct_altitude) / link_len
+
+    mu1u = integrate.simpson(ris_model(altitude) * 
+        np.pow( Theta - neg_Theta * mu_frac , 5/3 ),
+        altitude
+    )
+
+    mu2u = integrate.simpson(ris_model(altitude)* 
+        np.pow( 1 - mu_frac, 5/3 ),
+        altitude
+    )
+
+    outside_pow = np.pow( np.cos(zenith_angle), 8/5 ) / link_len
+    inside_pow = 2.91 * wavenumber_sq * (mu1u + 0.62 * mu2u * np.pow( Lambda, 11/6 ))
+    pow_term = np.pow( inside_pow, -3/5 )
+
+    return outside_pow * pow_term
+
+
 
 def fried_parameter_UL_TX(wavelength: real_t, zenith_angle: real_t, altitude: real_array_t, ris_model: Callable[[real_array_t], real_array_t], **_) -> np.float64:
     """Calculate the Fried paramater ($r_{0T}$) for an uplink beam, assuming an spherical wave \
