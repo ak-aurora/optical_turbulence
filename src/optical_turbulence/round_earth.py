@@ -322,7 +322,7 @@ def isonoplanatic_angle_UL(wavelength: real_t, \
     mu_frac = (distance - lct_distance) / link_distance
 
     mu1u = integrate.simpson(ris_model(altitude) * 
-        np.pow( Theta - neg_Theta * mu_frac , 5/3 ),
+        np.pow( Theta + neg_Theta * mu_frac , 5/3 ),
         distance
     )
 
