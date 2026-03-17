@@ -6,7 +6,9 @@ Scintillation index, Rytov variance, and Fried parameter following the flat-eart
 
 import numpy as np
 from scipy import integrate
-from ._definitions import *
+from .typing import *
+from .__decorators import warn_not_tested
+
 from typing import Callable
 
 # ----------------- CONSTANTS ----------------- #
@@ -16,6 +18,29 @@ EARTH_RADIUS = 6371e3 # [m]
 # ----------------- FUNCTIONS DEFINITIONS ----------------- #
 
 #region Utilities
+
+
+def create_distance_array(sat_altitude: real_t, zenith_angle: real_t, lct_altitude: real_t = 0) -> npt.NDArray[np.float64]:
+    """Create an array for the distance between the OGS and the satellite. The distance is calculated as a linspace
+        with the number of points in the array being such that one point is approximately one meter.
+
+    Args:
+        sat_altitude (real_t): Satellite altitude from sea level [m]
+        zenith_angle (real_t): Zenith angle between the LCT and SAT [rad]
+        lct_altitude (real_t, optional): Laser Communication Terminal altitude from sea level [m]. Default value: 0 m.
+
+    Returns:
+        npt.NDArray[np.float64]: array with distances
+
+    TODO:
+        Implement more ways to generate the points (so its not necessarily always linear)
+    """
+
+    link_distance = get_link_distance(sat_altitude=sat_altitude, zenith_angle=zenith_angle, lct_altitude=lct_altitude)
+    lct_distance = lct_altitude / np.cos(zenith_angle)
+
+    return np.linspace(lct_distance, link_distance + lct_distance, int(link_distance))
+
 
 def get_link_distance(sat_altitude: real_t, zenith_angle: real_t, lct_altitude: real_t = 0) -> np.float64:
     """Get the link distance ($L$) between the satellite and the laser communication terminal.

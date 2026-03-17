@@ -7,7 +7,10 @@ import numpy as np
 import scipy as sp
 from scipy.stats.sampling import NumericalInversePolynomial
 import mpmath
-from ._definitions import *
+
+from .typing import *
+from .__decorators import warn_custom, warn_not_tested
+
 from collections.abc import Callable
 from abc import ABC, abstractmethod
 

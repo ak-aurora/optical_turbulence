@@ -4,7 +4,8 @@ Wind speed models for the RIS models.
 
 import numpy as np
 from scipy import integrate
-from ._definitions import *
+from .typing import *
+from .__decorators import warn_not_tested
 
 @warn_not_tested # No results identified in literature
 def bufton_model(height: real_array_t | real_t, slew_rate, ground_speed) -> real_array_t | real_t:
@@ -12,13 +13,13 @@ def bufton_model(height: real_array_t | real_t, slew_rate, ground_speed) -> real
 
     Args:
         height (real_array_t or real_t): altitude at which to calculate the wind speed [m]
-        slew_rate (scalars): slew rate of the satellite connected via the link [rad/s]
-        ground_speed (scalars): ground wind speed [m/s]
+        slew_rate (real_t): slew rate of the satellite connected via the link [rad/s]
+        ground_speed (real_t): ground wind speed [m/s]
 
     Returns:
         numeric_t: wind speed for the given parameters
 
-    ## Source:
+    Source:
         Laser propagation through random media, 2 ed. p. 481
         D. P. Greenwood, “Bandwidth specification for adaptive optics systems*,” \
             Journal of the Optical Society of America, vol. 67, no. 3, p. 390, \
@@ -33,11 +34,11 @@ def rms_windspeed_bufton(slew_rate: real_t, ground_speed: real_t) -> np.float64:
     bufton wind model to estimate the wind speed at different heights.
 
     Args:
-        slew_rate (scalar): slew rate of the satellite [rad/s]
-        ground_speed (scalar): ground windspeed [m/s]
+        slew_rate (real_t): slew rate of the satellite [rad/s]
+        ground_speed (real_t): ground windspeed [m/s]
 
     Returns:
-        windspeed (scalar): rms windspeed.
+        windspeed (real_t): rms windspeed.
 
     Source:
         Laser beam propagation through random media 2 ed.

@@ -4,8 +4,10 @@ Classes to facilitate the use of the library
 
 from dataclasses import dataclass
 import warnings
-from ._definitions import real_t
+from .typing import real_t
+
 from typing import Dict
+
 import numpy as np
 
 

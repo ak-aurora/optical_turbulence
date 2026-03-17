@@ -4,7 +4,7 @@ import seaborn as sns
 from typing import Callable
 from src.optical_turbulence.flat_earth import scint_index_DL_PR_weak, scint_index_DL_PR_general, scint_index_DL_AA_general, scint_index_UL_tracked_gaussian, scint_index_UL_untracked_gaussian
 from src.optical_turbulence.ris_models import hufnagel_valley_model
-from src.optical_turbulence._definitions import real_array_t
+from optical_turbulence.typing import real_array_t
 from . import _test_utilities
 
 @_test_utilities.test_discussion(__name__, "It looks to be coherent; although, I have my doubts with the difference of weak and strong for the stronger ground RIS value.")
