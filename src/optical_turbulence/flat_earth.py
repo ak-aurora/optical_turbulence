@@ -405,7 +405,6 @@ def scint_index_UL_spherical(wavelength: real_t, \
 
     Note:
         This function is for a flat-earth model
-        Also known as $\\sigma_{Bu}$
 
     Args:
         wavelength (real_t): wavelength of the beam sent [m]
@@ -426,6 +425,48 @@ def scint_index_UL_spherical(wavelength: real_t, \
     rytov_var = rytov_variance_UL_spherical(wavelength, zenith_angle, altitude, ris_model)
 
     in_exp_1 = 0.49 * rytov_var / np.pow(1 + 0.56 * np.pow(rytov_var, 6/5), 7/6)
+    in_exp_2 = 0.51 * rytov_var / np.pow(1 + 0.69 * np.pow(rytov_var, 6/5), 5/6)
+    return np.exp(in_exp_1 + in_exp_2) - 1
+
+
+@warn_not_tested
+def scint_index_UL_gaussian(wavelength: real_t, \
+                            zenith_angle: real_t, \
+                            altitude: real_array_t, \
+                            ris_model: Callable[[real_array_t], real_array_t],
+                            Lambda: real_t,
+                            Theta: real_t,
+                            **_) \
+                            -> np.float64:
+    """Calculate the scintillation index for the case of \
+    a perfectly-tracked **uplink** gaussian wave being captured by a **point receiver** \
+    under **all turbulence conditions** weak, moderate, or strong.
+
+    Note:
+        This function is for a flat-earth model
+        Also known as $\\sigma_{Bu}$
+
+    Args:
+        wavelength (real_t): wavelength of the beam sent [m]
+        zenith_angle (real_t): zenith angle of the link [rad]
+        altitude (real_array_t): array with altitudes that cover the SATCOM link [m]
+        ris_model (callable[[real_array_t], real_array_t]): callable of the refractive-index \
+            structure model that only has one parameter: an array of altitudes [m^{-2/3}].
+
+    Returns:
+        out (np.float64): the scintillation index for the specific scenario [unitless].
+
+    Source
+        L. C. Andrews, Field Guide to Atmospheric Optics, Second Edition. in Field Guide Ser, no. \
+            v. FG41. Bellingham: Society of Photo-Optical Instrumentation Engineers, 2019. p. 52
+
+    """
+
+    rytov_var = rytov_variance_UL_gaussian(wavelength=wavelength, zenith_angle=zenith_angle,
+                                           altitude=altitude, ris_model=ris_model,
+                                           Lambda=Lambda, Theta=Theta)
+
+    in_exp_1 = 0.49 * rytov_var / np.pow(1 + (1 + Theta) * 0.56 * np.pow(rytov_var, 6/5), 7/6)
     in_exp_2 = 0.51 * rytov_var / np.pow(1 + 0.69 * np.pow(rytov_var, 6/5), 5/6)
     return np.exp(in_exp_1 + in_exp_2) - 1
 
