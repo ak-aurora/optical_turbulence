@@ -444,7 +444,6 @@ def scint_index_UL_gaussian(wavelength: real_t, \
 
     Note:
         This function is for a flat-earth model
-        Also known as $\\sigma_{Bu}$
 
     Args:
         wavelength (real_t): wavelength of the beam sent [m]
