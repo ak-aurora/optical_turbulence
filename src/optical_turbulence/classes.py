@@ -5,6 +5,7 @@ Classes to facilitate the use of the library
 from dataclasses import dataclass
 import warnings
 from .typing import real_t
+from .earth_models import EarthModel
 
 from typing import Dict
 
@@ -150,6 +151,23 @@ class OpticalBeam:
         return self._dic
 
 
+@dataclass
+class LinkDescriptor:
+    """Descriptor for a sat-Earth link."""
+    # TODO: Altitudes w.r.t ground/sea level
+
+    satellite_altitude: real_t
+    """[m] : Altitude of the satellite."""
+
+    lct_altitude: real_t
+    """[m] : Altitude of the Laser Communication Terminal/Optical Ground Station"""
+
+    zenith_angle: real_t
+    """[rad] : Zenith angle of the link."""
+
+    earth_model: EarthModel
+    """[n/a] : Earth model to use"""
+
+
 if __name__ == "__main__":
     a = OpticalBeam.rx_spot_size
-    
