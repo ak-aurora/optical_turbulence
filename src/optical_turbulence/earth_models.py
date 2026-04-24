@@ -16,7 +16,7 @@ class EarthModel(ABC):
                          lct_altitude: real_t, 
                          zenith_angle: real_t
                          ) -> real_array_t:
-        """From an arrays with altitudes from sea level calculate the corresponding array with \
+        """From an array with altitudes from sea level calculate the corresponding array with \
             link distances (distance from the OGS to that point for each altitude). 
 
         Args:
@@ -60,7 +60,7 @@ class EarthModel(ABC):
     def calculate_total_link_distance(sat_altitude: real_t,
                                       lct_altitude: real_t,
                                       zenith_angle: real_t) -> real_t:
-        """Calculate the total link distance between LCT/OGS and satelite.
+        """Calculate the total link distance between LCT/OGS and satellite.
 
         Args:
             sat_altitude (real_t): altitude to the satellite from sea level [m].
