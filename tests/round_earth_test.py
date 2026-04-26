@@ -1,9 +1,25 @@
-import numpy as np
+import copy
+
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
+
+from src.optical_turbulence.classes import LinkDescriptionManager, OpticalBeam
+from src.optical_turbulence.earth_models import RoundEarthModel
+from src.optical_turbulence.parameters import (
+    _total_beam_wander_variance_UL_gaussian,
+    scint_index_DL_AA_general,
+    scint_index_DL_PR_general,
+    scint_index_DL_PR_weak,
+    scint_index_UL_tracked_gaussian,
+    scint_index_UL_untracked_gaussian,
+)
 from src.optical_turbulence.ris_models import hufnagel_valley_model
+from src.optical_turbulence.typing import real_array_t
+from src.optical_turbulence.utils import create_altitude_array
+
 from ._test_utilities import test_discussion
-from src.optical_turbulence.round_earth import *
+
 
 @test_discussion(__name__, "It seems to follow the behaviour of the plot in the book. There is a small difference with flat-earth for big zenith")
 def test1():
@@ -15,24 +31,60 @@ def test1():
         - scint_index_DL_PR_general
     """
 
-    altitude = np.linspace(0, 300e3, 300000) # [m] 300 km altitude
+    sat_altitude = 300e3
+    # altitude_array = np.linspace(0, sat_altitude, int(sat_altitude)) # [m] 300 km altitude
     wavelen = 1.06 * 1e-6 # [m] 1.06 um
     A1 = 1.7e-14 # "weak ground RIS"
     A2 = 3e-13 # "moderate-strong ground RIS"
 
+    link_info = LinkDescriptionManager(
+        satellite_altitude=sat_altitude,
+        lct_altitude=0,
+        zenith_angle=0,
+        earth_model=RoundEarthModel(),
+        altitude_array_factory=create_altitude_array
+    )
+
     zeniths = np.linspace(0, 85, 85)
     zeniths_rad = zeniths * (np.pi / 180)
 
-    distances = [get_distance_from_altitude(altitude=altitude, zenith_angle=zen) for zen in zeniths_rad]
-    zen_dis = list(zip(zeniths_rad, distances))
+    def ris_model_1(h: real_array_t):
+        return hufnagel_valley_model(h, A=A1)
+    
+    def ris_model_2(h: real_array_t):
+        return hufnagel_valley_model(h, A=A2)
 
-    ris_model_1 = lambda h: hufnagel_valley_model(h, A=A1)
-    ris_model_2 = lambda h: hufnagel_valley_model(h, A=A2)
+    scints_1_weak = np.empty(shape=zeniths_rad.shape)
+    scints_2_weak = np.empty(shape=zeniths_rad.shape)
+    scints_1_modstr = np.empty(shape=zeniths_rad.shape)
+    scints_2_modstr = np.empty(shape=zeniths_rad.shape)
 
-    scints_1_weak = np.array([ scint_index_DL_PR_weak(wavelen, zenang, dist, ris_model_1) for zenang, dist in zen_dis ]) # type: ignore
-    scints_2_weak = np.array([ scint_index_DL_PR_weak(wavelen, zenang, dist, ris_model_2) for zenang, dist in zen_dis ]) # type: ignore
-    scints_1_modstr = np.array([ scint_index_DL_PR_general(wavelen, zenang, dist, ris_model_1) for zenang, dist in zen_dis ]) # type: ignore
-    scints_2_modstr = np.array([ scint_index_DL_PR_general(wavelen, zenang, dist, ris_model_2) for zenang, dist in zen_dis ]) # type: ignore
+    for i, zenang in enumerate(zeniths_rad):
+        link_info.zenith_angle = zenang
+
+        scints_1_weak[i] = scint_index_DL_PR_weak(
+            wavelength=wavelen,
+            ris_model=ris_model_1,
+            **link_info.arrays_as_dict()
+        )
+
+        scints_2_weak[i] = scint_index_DL_PR_weak(
+            wavelength=wavelen,
+            ris_model=ris_model_2,
+            **link_info.arrays_as_dict()
+        )
+
+        scints_1_modstr[i] = scint_index_DL_PR_general(
+            wavelength=wavelen,
+            ris_model=ris_model_1,
+            **link_info.arrays_as_dict()
+        )
+
+        scints_2_modstr[i] = scint_index_DL_PR_general(
+            wavelength=wavelen,
+            ris_model=ris_model_2,
+            **link_info.arrays_as_dict()
+        )
 
     fig, ax = plt.figure(), plt.axes()
     sns.lineplot(y=scints_1_weak, x=zeniths, label="Weak turbulence regime", ax=ax, linestyle="dotted", color="blue")
@@ -53,25 +105,49 @@ def test1():
 @test_discussion(__name__, "ok. No much difference with flat-earth")
 def test2():
     """Compare the expressions to the Fig. 12.6 p.496 from
-    L. C. Andrews, Laser Beam Propagation Through Random Media, 2nd ed. in Press Monograph Series, no. v. PM152. Bellingham: SPIE, 2005.
+    L. C. Andrews, Laser Beam Propagation Through Random Media, 2nd Ed, 2nd ed. in Press Monograph Series, no. v. PM152. Bellingham: SPIE, 2005.
     
     Tested function:
         - scint_index_DL_AA_general
     """
 
-    altitude = np.linspace(0, 300e3, 300000) # [m] 300 km altitude
+    sat_altitude = 300e3
     wavelen = 1.55 * 1e-6 # [m] 1.55 um
     zangle1 = 45 * (np.pi / 180)
     zangle2 = 60 * (np.pi / 180)
 
+    link_zang1 = LinkDescriptionManager(
+        satellite_altitude=sat_altitude,
+        lct_altitude=0,
+        zenith_angle=zangle1,
+        earth_model=RoundEarthModel(),
+        altitude_array_factory=create_altitude_array
+    )
+
+    link_zang2 = copy.deepcopy(link_zang1)
+    link_zang2.zenith_angle = zangle2
+
     diameters_cm = np.linspace(0, 50, 50) # [cm]
     diameters = diameters_cm / 100 # [m]
 
-    distance1 = get_distance_from_altitude(altitude=altitude, zenith_angle=zangle1)
-    distance2 = get_distance_from_altitude(altitude=altitude, zenith_angle=zangle2)
+    scints_za1 = np.empty(shape=diameters.shape)
+    scints_za2 = np.empty(shape=diameters.shape)
 
-    scints_za1 = [scint_index_DL_AA_general(wavelen, zangle1, distance1, hufnagel_valley_model, diam) for diam in diameters] # type: ignore
-    scints_za2 = [scint_index_DL_AA_general(wavelen, zangle2, distance2, hufnagel_valley_model, diam) for diam in diameters] # type: ignore
+    for i, diam in enumerate(diameters):
+        
+        scints_za1[i] = scint_index_DL_AA_general(
+            aperture_diameter=diam,
+            wavelength=wavelen,
+            ris_model=hufnagel_valley_model,
+            **link_zang1.arrays_as_dict()
+        )
+
+        scints_za2[i] = scint_index_DL_AA_general(
+            aperture_diameter=diam,
+            wavelength=wavelen,
+            ris_model=hufnagel_valley_model,
+            **link_zang2.arrays_as_dict()
+        )
 
     fig, ax = plt.figure(), plt.axes()
     sns.lineplot(y=scints_za1, x=diameters_cm, label=r"$\zeta = 45^\circ$", ax=ax, color="red")
@@ -88,12 +164,9 @@ def test2():
     plt.close()
 
 
-from src.optical_turbulence.round_earth import _total_beam_wander_variance_UL_gaussian
-
-
 @test_discussion(__name__, "ok")
 def test3():
-    """Compare the expressions to the Fig. 12.11 p. 503 from ((Only the infinite outer scale one))
+    """Compare the expressions to the Fig. 12.11 p. 503 from
     [1] L. C. Andrews, Laser Beam Propagation Through Random Media, 2nd Ed, 2nd ed. in Press Monograph Series, no. v. PM152. Bellingham: SPIE, 2005.
     
     Compare to Fig. 2 from
@@ -103,16 +176,23 @@ def test3():
         - _total_beam_wander_variance_UL_gaussian
 
     """
-    altitude = np.linspace(0, 100e3, 100000) # [m] 300 km altitude
+    sat_altitude = 300e3
+    # altitude = np.linspace(0, 100e3, 100000) # [m] 300 km altitude
+    # link_distance = np.max(altitude) - np.min(altitude)
 
     zangle1 = 0 * (np.pi / 180)
     zangle2 = 60 * (np.pi / 180)
 
-    distance1 = get_distance_from_altitude(altitude=altitude, zenith_angle=zangle1)
-    distance2 = get_distance_from_altitude(altitude=altitude, zenith_angle=zangle2)
+    link_zang1 = LinkDescriptionManager(
+        satellite_altitude=sat_altitude,
+        lct_altitude=0,
+        zenith_angle=zangle1,
+        earth_model=RoundEarthModel(),
+        altitude_array_factory=create_altitude_array
+    )
 
-    link_len_1 = np.max(distance1) - np.min(distance1)
-    link_len_2 = np.max(distance2) - np.min(distance2)
+    link_zang2 = copy.deepcopy(link_zang1)
+    link_zang2.zenith_angle = zangle2
 
     pfront_radius = np.inf
 
@@ -123,30 +203,27 @@ def test3():
     rms_angular_1 = np.zeros(np.size(beam_radii_cm))
     rms_angular_2 = np.zeros(np.size(beam_radii_cm))
 
-
     common_parameters = {
         "ris_model": ris_model,
-        "pfront_radius": pfront_radius
-    }
-
-    param_1 = {
-        **common_parameters,
-        "distance": distance1,
-        "zenith_angle": zangle1
-    }
-
-    param_2 = {
-        **common_parameters,
-        "distance": distance2,
-        "zenith_angle": zangle2
+        "pfront_radius": pfront_radius,
     }
 
     for i, bradius in enumerate(beam_radii):
-        rms_angular_1[i] = _total_beam_wander_variance_UL_gaussian(beam_radius=bradius, **param_1)
-        rms_angular_2[i] = _total_beam_wander_variance_UL_gaussian(beam_radius=bradius, **param_2)
 
-    rms_angular_1 = np.sqrt(rms_angular_1) / link_len_1 * 1e6
-    rms_angular_2 = np.sqrt(rms_angular_2) / link_len_2 * 1e6
+        rms_angular_1[i] = _total_beam_wander_variance_UL_gaussian(
+            beam_radius=bradius,
+            **common_parameters,  # ty:ignore[invalid-argument-type]
+            **link_zang1.arrays_as_dict()  # ty:ignore[parameter-already-assigned]
+        )
+
+        rms_angular_2[i] = _total_beam_wander_variance_UL_gaussian(
+            beam_radius=bradius,
+            **common_parameters,  # ty:ignore[invalid-argument-type]
+            **link_zang2.arrays_as_dict()  # ty:ignore[parameter-already-assigned]
+        )
+
+    rms_angular_1 = np.sqrt(rms_angular_1) / link_zang1.link_distance() * 1e6
+    rms_angular_2 = np.sqrt(rms_angular_2) / link_zang2.link_distance() * 1e6
 
     fig, ax = plt.figure(), plt.axes()
     sns.lineplot(y=rms_angular_1, x=beam_radii_cm, label=r"Zenith = $0^\circ$", ax=ax, color="blue")
@@ -178,32 +255,28 @@ def test4():
         - fried_parameter_UL_TX
     """
 
-    altitude = np.linspace(0, 300e3, 300000) # [m] 300 km altitude
-    wavelen = 1.6 * 1e-6 # [m] 1.6 um
-    zangle = 0 * (np.pi / 180)
-    pfront_radius = np.inf
-    distance = get_distance_from_altitude(altitude=altitude, zenith_angle=zangle)
-    link_length = np.max(distance) - np.min(distance)
+    sat_altitude = 300e3 # [m]
 
-    wavenum = 2 * np.pi / wavelen
+    link_info = LinkDescriptionManager(
+        satellite_altitude=sat_altitude,
+        lct_altitude=0,
+        zenith_angle=0,
+        earth_model=RoundEarthModel(),
+        altitude_array_factory=create_altitude_array
+    )
+
+    beam = OpticalBeam(
+        beam_radius= 0.5, # temp value
+        pfront_radius=np.inf,
+        wavelength=1.6 * 1e-6, # [m] 1.6 um,
+        link_distance=link_info.link_distance()
+    )
 
     beam_radii_cm = np.linspace(0.5, 200, 300) # [cm]
     beam_radii = beam_radii_cm / 100 # [m]
 
-    theta_zero = 1 - link_length / pfront_radius
-
-
     # This info is not given in the book
     ris_model = hufnagel_valley_model # HV5/7
-
-    # Function params
-    fixed_params = {
-        "wavelength": wavelen,
-        "zenith_angle": zangle,
-        "distance": distance,
-        "ris_model": ris_model,
-        "pfront_radius": pfront_radius
-    }
 
     # where to save the data
     scint_index_tr = np.zeros(np.size(beam_radii_cm))
@@ -212,22 +285,22 @@ def test4():
     num_iterations = np.size(beam_radii_cm)
     for i, radius in enumerate(beam_radii):
         print(f"Running test... {i / num_iterations * 100: .1f}%", end="\r")
-        lambda_zero = 2 * link_length / (wavenum * np.pow(radius, 2))
-        _denominator = ( np.pow(theta_zero, 2) + np.pow(lambda_zero, 2) )
-        _Lambda = lambda_zero / _denominator
-        _Theta = theta_zero / _denominator
-        rx_spot_radius = radius * np.sqrt(_denominator)
+        
+        beam.beam_radius = radius
 
-        varying_params = {
-            "beam_radius": radius,
-            "Lambda": _Lambda,
-            "Theta": _Theta,
-            "rx_spot_size": rx_spot_radius
-        }
+        scint_index_tr[i] = scint_index_UL_tracked_gaussian(
+            ris_model=ris_model,
+            **beam.as_dict(),
+            **link_info.arrays_as_dict()
+        )
 
-        scint_index_tr[i] = scint_index_UL_tracked_gaussian(**fixed_params, **varying_params)
-        scint_index_utr[i] = scint_index_UL_untracked_gaussian(**fixed_params, **varying_params)
-    print(f"Running test... finished. Showing results.", end="\r")
+        scint_index_utr[i] = scint_index_UL_untracked_gaussian(
+            ris_model=ris_model,
+            **beam.as_dict(),
+            **link_info.arrays_as_dict()
+        )
+
+    print("Running test... finished. Showing results.", end="\r")
 
     fig, ax = plt.figure(), plt.axes()
     sns.lineplot(y=scint_index_tr, x=beam_radii_cm, label="Tracked", ax=ax, color="blue", linestyle="dashed")

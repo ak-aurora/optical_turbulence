@@ -7,20 +7,33 @@ Types of tests:
 
 """
 
-from src.optical_turbulence.statistical_models import __GammaGammaDist, __ModulatedGammaDist, _exponweib_g_function
-from src.optical_turbulence.statistical_models import *
-from src.optical_turbulence.flat_earth import _bw_pointing_error_var_UL_gaussian
-from src.optical_turbulence.ris_models import hufnagel_valley_model
-from ._test_utilities import test_discussion
+from multiprocessing import Pool
+
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sp
 import seaborn as sns
-import matplotlib.pyplot as plt
-from multiprocessing import Pool
 from colorama import Fore, just_fix_windows_console
+
+from src.optical_turbulence.parameters import _bw_pointing_error_var_UL_gaussian
+from src.optical_turbulence.ris_models import hufnagel_valley_model
+from src.optical_turbulence.statistical_models import (
+    Distribution,
+    __GammaGammaDist,
+    __ModulatedGammaDist,
+    exponweib_DL_AA,
+    gamma_gamma_UL_PR,
+    gamma_UL_PR_tracked,
+    lognormal_DL_AA,
+    modulated_gamma_UL_PR_untracked,
+)
+from src.optical_turbulence.utils import create_altitude_array
+
+from ._test_utilities import test_discussion
+
 just_fix_windows_console()
 
-TEST_STR = Fore.MAGENTA + "[TEST INFO] " + Fore.RESET
+TEST_STR = Fore.MAGENTA + "[TEST INFO] " + Fore.RESET  # ty:ignore[unsupported-operator]
 
 # --------- PDF DEFINITIONS TEST ---------
 
@@ -107,8 +120,19 @@ def ModulatedGamma():
         Lambda = lambda_zero / _denominator
         rx_spot_size = radius * np.sqrt(_denominator)
 
-        altitude = np.linspace(0, link_length, int(link_length))
-        pointing_error = _bw_pointing_error_var_UL_gaussian(1.55e-6, 0, altitude, hufnagel_valley_model, radius, np.inf) # type: ignore
+        altitude_array = create_altitude_array(
+            sat_altitude=link_length,
+            lct_altitude=0,
+        )
+
+        pointing_error = _bw_pointing_error_var_UL_gaussian(
+            wavelength=1.55e-6,
+            beam_radius=radius,
+            pfront_radius=np.inf,
+            ris_model=hufnagel_valley_model,
+            altitude_array=altitude_array,
+            link_array=altitude_array# They are the same since zenith = 0
+        )
 
         param_dict = {
             "Lambda": Lambda,
@@ -244,7 +268,8 @@ def GammaLiterature():
 
         _scale = scint
         _shape = 1 / scint
-        pdf = lambda x: sp.stats.gamma.pdf(x, a=_shape, scale=_scale)
+        def pdf(x):
+            return sp.stats.gamma.pdf(x, a=_shape, scale=_scale)
         _x = np.linspace(1e-9, 10, 10000)
         _y = pdf(_x)
         _Sy = _y / strehl
@@ -380,5 +405,5 @@ if __name__ == "__main__":
     # ExponentiatedWeibullLiterature()
     # LognormalLiterature()
 
-    print(Fore.CYAN + "[INFO]" + Fore.MAGENTA + " EW and LN distributions and PDFs dont match for same parameters (idk why)" + Fore.RESET)
+    print(Fore.CYAN + "[INFO]" + Fore.MAGENTA + " EW and LN distributions and PDFs dont match for same parameters (idk why)" + Fore.RESET)  # ty:ignore[unsupported-operator]
     print("No more tests...")
