@@ -43,7 +43,7 @@ $$r_0 = \left[0.42k^2\int_{0}^R C_n^2(h(z))dz\right]^{-3/5}$$
 
 ### `isonoplanatic_angle_UL`
 
-$$\theta_0 = \left\lbraceL\left[ 2.91 k^2  (\mu_{1u} + 0.62\mu_{2u}\Lambda^{11/6}) \right]^{3/5}\right\rbrace^{-1}$$
+$$\theta_0 = \left\lbrace L\left[ 2.91 k^2  (\mu_{1u} + 0.62\mu_{2u}\Lambda^{11/6}) \right]^{3/5}\right\rbrace^{-1}$$
 
 with
 
