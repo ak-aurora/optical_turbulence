@@ -1,6 +1,6 @@
 """
 Scintillation index, Rytov variance, and Fried parameter following the "link distance" model. Downlink and Uplink.
-The implementations are focus on link distance and are earth-model agnostic \
+The implementations focus on link distance and are earth-model agnostic \
 """
 
 __author__ = "Agustín González Uriarte"
@@ -23,7 +23,7 @@ EARTH_RADIUS = 6371e3 # [m]
 
 #region DOWNLINK
 
-@warn_not_tested
+
 def scint_index_DL_PR_weak(
         wavelength: real_t,
         ris_model: Callable[[real_array_t], real_array_t],
@@ -101,7 +101,7 @@ def scint_index_DL_PR_general(
 
     return np.exp(in_exp_l + in_exp_r) - 1
 
-@warn_not_tested
+
 def scint_index_DL_AA_general(
         aperture_diameter: real_t,
         wavelength: real_t,
@@ -245,7 +245,6 @@ def isonoplanatic_angle_UL(
     return outside_pow * pow_term
 
 
-@warn_not_tested
 def fried_parameter_UL_TX(
         wavelength: real_t, 
         ris_model: Callable[[real_array_t], real_array_t],
@@ -415,7 +414,6 @@ def scint_index_UL_spherical(
     return np.exp(in_exp_1 + in_exp_2) - 1
 
 
-@warn_not_tested
 def rytov_variance_UL_gaussian(
         wavelength: real_t,
         Lambda: real_t,
@@ -513,7 +511,6 @@ def scint_index_UL_gaussian(
     return np.exp(in_exp_1 + in_exp_2) - 1
 
 
-@warn_not_tested
 def _total_beam_wander_variance_UL_gaussian(
         beam_radius: real_t,
         pfront_radius: real_t,
@@ -559,7 +556,6 @@ def _total_beam_wander_variance_UL_gaussian(
     return left * right
 
 
-@warn_not_tested
 def _bw_pointing_error_var_UL_gaussian(
         wavelength: real_t,
         beam_radius: real_t,
@@ -614,7 +610,6 @@ def _bw_pointing_error_var_UL_gaussian(
     return beam_wander_variance * second_term
 
 
-@warn_not_tested
 def _bw_pointing_error_var_UL_gaussian_TT(
         wavelength: real_t,
         beam_radius: real_t,
@@ -673,7 +668,6 @@ def _bw_pointing_error_var_UL_gaussian_TT(
     return first_term * second_term
 
 
-@warn_not_tested
 def scint_index_UL_untracked_gaussian(
         wavelength: real_t,
         beam_radius: real_t,
@@ -754,7 +748,6 @@ def scint_index_UL_untracked_gaussian(
     return left + right
 
 
-@warn_not_tested
 def scint_index_UL_tracked_gaussian(
         wavelength: real_t, \
         beam_radius: real_t,
