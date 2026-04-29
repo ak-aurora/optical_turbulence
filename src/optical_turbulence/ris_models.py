@@ -3,8 +3,8 @@ Refractive-index structure (RIS) models for varying altitude.
 """
 
 import numpy as np
-from .typing import *
 
+from .typing import real_array_t, real_t
 
 # ---------
 
@@ -17,8 +17,10 @@ HAP_REF_HEIGHT = 2 # [m]
 #
 
 
-def hufnagel_valley_model(altitude: real_array_t | real_t, rms_wind_speed: real_t = np.float64(21), A: real_t = np.float64(1.7e-14))\
-    -> np.typing.NDArray[np.float64] | np.float64:
+def hufnagel_valley_model[T: real_t | real_array_t](
+        altitude: T, 
+        rms_wind_speed: real_t = np.float64(21), 
+        A: real_t = np.float64(1.7e-14)) -> T:
     """Calculate the refractive-index structure ($C_n^2$) using the Hufnagel-Valley\
     boundary model. If the wind and A parameters are not given, the HV5/7 model is used.
 
@@ -42,18 +44,21 @@ def hufnagel_valley_model(altitude: real_array_t | real_t, rms_wind_speed: real_
             from i = 1 to i = 139.
     """
 
-    a = 0.00594 * (rms_wind_speed / 27)**2 * (10**(-5) * altitude) ** 10 * np.exp(-altitude / 1000)
+    a = 0.00594 * (rms_wind_speed / 27)**2 * (10**(-5) * altitude) ** 10 * np.exp(-altitude / 1000)  # ty:ignore[unsupported-operator]
     b = 2.7 * 10 ** (-16) * np.exp(-altitude / 1500)
     c = A * np.exp(-altitude / 100)
 
-    return a + b + c
+    return a + b + c # pyright: ignore[reportReturnType]
 
 # ---------------------------------------
 #   Hufnagel-Andrews-Phillips Model
 #
 
-def hap_model_daytime(altitude: real_array_t | real_t, rms_wind_speed: real_t = np.float64(21), A: real_t = np.float64(1.7e-14),\
-                      M: real_t = np.float64(1), **_) -> np.typing.NDArray[np.float64] | np.float64:
+def hap_model_daytime[T: real_t | real_array_t](
+        altitude: T, 
+        rms_wind_speed: real_t = np.float64(21), 
+        A: real_t = np.float64(1.7e-14),
+        M: real_t = np.float64(1), **_) -> T:
     """Calculate the refractive-index structure ($C_n^2$) using the Hufnagel-Andrews-Phillips\
     boundary model for **daytime**. If the wind and A parameters are not given, the HV5/7 model parameters \
         are used.
@@ -92,14 +97,17 @@ def hap_model_daytime(altitude: real_array_t | real_t, rms_wind_speed: real_t = 
     if np.min(altitude) <= 0:
         raise ValueError("altitude has to be greater than zero.")
     
-    a = 1.04 * 1e-3 * ( (rms_wind_speed / 27) ** 2 ) * ( (( altitude + HAP_GND_HEIGHT ) * 1e-5) ** 10 ) * np.exp(- ((altitude + HAP_GND_HEIGHT) / 1200.0) )
-    b = 2.7 * 1e-16 * np.exp( -(( altitude + HAP_GND_HEIGHT ) / 1700.0) )
-    c = A * np.pow( ( HAP_REF_HEIGHT / altitude), 4/3 )
-    return M * (a + b) + c
+    a = 1.04 * 1e-3 * ( (rms_wind_speed / 27) ** 2 ) * ( (( altitude + HAP_GND_HEIGHT ) * 1e-5) ** 10 ) * np.exp(- ((altitude + HAP_GND_HEIGHT) / 1200.0) )  # ty:ignore[unsupported-operator]
+    b = 2.7 * 1e-16 * np.exp( -(( altitude + HAP_GND_HEIGHT ) / 1700.0) )  # ty:ignore[unsupported-operator]
+    c = A * np.pow( ( HAP_REF_HEIGHT / altitude), 4/3 )  # ty:ignore[unsupported-operator]
+    return M * (a + b) + c # pyright: ignore[reportReturnType]
 
 # @warn_not_tested # missing a plot to compare with
-def hap_model_nightime(altitude: real_array_t | real_t, rms_wind_speed: real_t = np.float64(21), A: real_t = np.float64(1.7e-14),\
-                       M: real_t = np.float64(1), **_) -> np.typing.NDArray[np.float64] | np.float64:
+def hap_model_nightime[T: real_t | real_array_t](
+        altitude: T, 
+        rms_wind_speed: real_t = np.float64(21), 
+        A: real_t = np.float64(1.7e-14),
+        M: real_t = np.float64(1), **_) -> T:
     """Calculate the refractive-index structure ($C_n^2$) using the Hufnagel-Andrews-Phillips\
     boundary model for **nighttime**. If the wind and A parameters are not given, the HV5/7 model parameters \
         are used.
@@ -138,8 +146,8 @@ def hap_model_nightime(altitude: real_array_t | real_t, rms_wind_speed: real_t =
     if np.min(altitude) <= 0:
         raise ValueError("altitude has to be greater than zero.")
 
-    a = 1.04 * 1e-3 * ( (rms_wind_speed / 27) ** 2 ) * ( (( altitude + HAP_GND_HEIGHT ) * 1e-5) ** 10 ) * np.exp(- (( altitude + HAP_GND_HEIGHT ) / 1200.0))
-    b = 2.7 * 1e-16 * np.exp( -(( altitude + HAP_GND_HEIGHT ) / 1700.0) )
-    c = A * np.exp( -(altitude / 1000.0)) * np.pow(( HAP_REF_HEIGHT / altitude), 2/3)
+    a = 1.04 * 1e-3 * ( (rms_wind_speed / 27) ** 2 ) * ( (( altitude + HAP_GND_HEIGHT ) * 1e-5) ** 10 ) * np.exp(- (( altitude + HAP_GND_HEIGHT ) / 1200.0))  # ty:ignore[unsupported-operator]
+    b = 2.7 * 1e-16 * np.exp( -(( altitude + HAP_GND_HEIGHT ) / 1700.0) )  # ty:ignore[unsupported-operator]
+    c = A * np.exp( -(altitude / 1000.0)) * np.pow(( HAP_REF_HEIGHT / altitude), 2/3)  # ty:ignore[unsupported-operator]
 
-    return M * (a + b) + c
+    return M * (a + b) + c # pyright: ignore[reportReturnType]

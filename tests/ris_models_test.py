@@ -7,11 +7,14 @@ Tested functions:
     - HV Model
     - HAP Daytime    
 """
-from . import _test_utilities
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
-from src.optical_turbulence.ris_models import hufnagel_valley_model, hap_model_daytime
+
+from src.optical_turbulence.ris_models import hap_model_daytime, hufnagel_valley_model
+
+from . import _test_utilities
+
 
 @_test_utilities.test_discussion(__name__, \
                                  "The results are consistent; however, the plot in the 2023 book" \

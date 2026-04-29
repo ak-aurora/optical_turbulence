@@ -3,16 +3,16 @@
 
 # ----------------- IMPORTS ----------------- #
 
+from abc import ABC, abstractmethod
+from collections.abc import Callable
+
+import mpmath
 import numpy as np
 import scipy as sp
 from scipy.stats.sampling import NumericalInversePolynomial
-import mpmath
 
-from .typing import *
 from .__decorators import warn_custom, warn_not_tested
-
-from collections.abc import Callable
-from abc import ABC, abstractmethod
+from .typing import real_t
 
 # ----------------- TEMPLATES AND CONSTANTS ----------------- #
 
@@ -211,7 +211,7 @@ class __GammaGammaDist(Distribution):
 
         return first_term * second_term * third_term
 
-    @warn_custom(f"[GammaGammaDist] this function may not be stable after a given value.")
+    @warn_custom("[GammaGammaDist] this function may not be stable after a given value.")
     def cdf(self, thrsh) -> real_t:
         """Obtain the value of the CDF of the GammaGamma distribution for a given threshold.
 
@@ -431,7 +431,7 @@ def modulated_gamma_UL_PR_untracked(scintillation_index: real_t,
     wander_parameter = np.sqrt(1 + wparam_numerator / wparam_denominator) - 1
 
     if (shape_parameter - wander_parameter) <= 0:
-        raise ValueError(f"the values entered for the system are not valid! The following relation must happen " + r"$m - \vartheta > 0$ (currently not happening)")
+        raise ValueError("the values entered for the system are not valid! The following relation must happen " + r"$m - \vartheta > 0$ (currently not happening)")
 
     # Create the distribution and obtain the inverse to be able to sample
     dist = __ModulatedGammaDist(wander_param=wander_parameter, shape_param=shape_parameter)
