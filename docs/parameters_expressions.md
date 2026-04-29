@@ -104,14 +104,14 @@ $$T_z = 0.57\left(\frac{\lambda}{2W_0}\right)\left(\frac{2W_0}{r_{0T}}\right)^{5
 ### `scint_index_UL_untracked_gaussian`
 
 $$\begin{aligned}
-\sigma_{I, l}^2(0, L)_{\text {untracked }}&=34.29\left(\frac{\Lambda L}{k r_{0T}^2}\right)^{5 / 6}\left(\frac{\sigma_{p e}^2}{W^2}\right)\\&+ \exp \left\lbrace\frac{0.49 \sigma_{B u}^2}{\left[1+(1+\Theta) 0.56 \sigma_{B u}^{12 / 5}\right]^{7 / 6}}+\frac{0.51 \sigma_{B u}^2}{\left(1+0.69 \sigma_{B u}^{12 / 5}\right)^{5 / 6}}\right\rbrace-1 
+\sigma_{I, l}^2(0, L)_{\text {untracked }}&=34.29\left(\frac{\Lambda L}{k r_{0T}^2}\right)^{5 / 6}\left(\frac{\sigma_{p e}^2}{W^2}\right)+ \exp \left\lbrace\frac{0.49 \sigma_{B u}^2}{\left[1+(1+\Theta) 0.56 \sigma_{B u}^{12 / 5}\right]^{7 / 6}}+\frac{0.51 \sigma_{B u}^2}{\left(1+0.69 \sigma_{B u}^{12 / 5}\right)^{5 / 6}}\right\rbrace-1 
 \end{aligned}$$
 
 ### `scint_index_UL_tracked_gaussian`
 
 
 $$\begin{aligned}
-\sigma_{I, l}^2(0, L)_{\text {tracked,TC }}&=34.29\left(\frac{\Lambda_{LT} L}{k r_{0T}^2}\right)^{5 / 6}\left(\frac{\sigma_{p e,TC}^2}{W_{LT}^2}\right)\\&+ \exp \left\lbrace\frac{0.49 \sigma_{B u}^2}{\left[1+(1+\Theta) 0.56 \sigma_{B u}^{12 / 5}\right]^{7 / 6}}+\frac{0.51 \sigma_{B u}^2}{\left(1+0.69 \sigma_{B u}^{12 / 5}\right)^{5 / 6}}\right\rbrace-1 
+\sigma_{I, l}^2(0, L)_{\text {tracked,TC }}&=34.29\left(\frac{\Lambda_{LT} L}{k r_{0T}^2}\right)^{5 / 6}\left(\frac{\sigma_{p e,TC}^2}{W_{LT}^2}\right)+ \exp \left\lbrace\frac{0.49 \sigma_{B u}^2}{\left[1+(1+\Theta) 0.56 \sigma_{B u}^{12 / 5}\right]^{7 / 6}}+\frac{0.51 \sigma_{B u}^2}{\left(1+0.69 \sigma_{B u}^{12 / 5}\right)^{5 / 6}}\right\rbrace-1 
 \end{aligned}$$
 
 where 
