@@ -4,7 +4,7 @@ Wind speed models for the RIS models.
 
 import numpy as np
 from scipy import integrate
-from .typing import *
+from .typing import real_t, real_array_t
 from .__decorators import warn_not_tested
 
 @warn_not_tested # No results identified in literature
@@ -44,6 +44,7 @@ def rms_windspeed_bufton(slew_rate: real_t, ground_speed: real_t) -> np.float64:
         Laser beam propagation through random media 2 ed.
 
     """
-    _bufton = lambda h: bufton_model(h, slew_rate, ground_speed)
+    def _bufton(h):
+        return bufton_model(h, slew_rate, ground_speed)
     integral = integrate.quad(_bufton, 5e3, 20e3)
     return np.sqrt( integral[0] / ( 15e3 ) )
