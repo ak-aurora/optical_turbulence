@@ -2,14 +2,17 @@
 Classes to facilitate the use of the library
 """
 
-from dataclasses import dataclass, field
 import warnings
-from .typing import real_t
-from typing import Dict, Callable, TypedDict
-from .earth_models import EarthModelGeneric
+from dataclasses import dataclass, field
+from typing import Callable, TypedDict
 
 import numpy as np
 import numpy.typing as npt
+
+from .earth_models import EarthModelGeneric, RoundEarthModel
+from .typing import real_array_t, real_t
+from .utils import create_altitude_array
+
 
 class OpticalBeamParameters(TypedDict):
     beam_radius: real_t
@@ -184,8 +187,8 @@ class LinkDescriptionManager():
             satellite_altitude: real_t,
             lct_altitude: real_t,
             zenith_angle: real_t,
-            earth_model: EarthModelGeneric,
-            altitude_array_factory: Callable[[real_t, real_t], npt.NDArray[np.float64]]
+            earth_model: EarthModelGeneric | None = None,
+            altitude_array_factory: Callable[[real_t, real_t], npt.NDArray[np.float64]] | None = None
     ):
         """Constructor
 
@@ -193,17 +196,25 @@ class LinkDescriptionManager():
             satellite_altitude (real_t): satellite altitude [m]
             lct_altitude (real_t): LCT/OGS altitude [m]
             zenith_angle (real_t): zenith angle of the link [rad]
-            earth_model (EarthModelGeneric): earth model [n/a]
+            earth_model (EarthModelGeneric, optional): earth model [n/a]. Defaults to RoundEarthModel.
             altitude_array_factory (Callable[[sat_altitude: real_t, \
-                lct_altitude: real_t], altitude_array: npt.NDArray[np.float64]]): \
-                callable to slice the atmosphere all values have to be in meters.
+                lct_altitude: real_t], altitude_array: npt.NDArray[np.float64]], optional): \
+                callable to slice the atmosphere all values have to be in meters. Defaults to slicing every 1 m.
         """
 
         self.sat_altitude = satellite_altitude
         self.lct_altitude = lct_altitude
         self.zenith_angle = zenith_angle
-        self.earth_model = earth_model
-        self.altitude_array_factory = altitude_array_factory
+
+        if earth_model is None:
+            self.earth_model = RoundEarthModel()
+        else:
+            self.earth_model = earth_model
+
+        if altitude_array_factory is None:
+            self.altitude_array_factory = create_altitude_array
+        else:
+            self.altitude_array_factory = altitude_array_factory
         
         self._update_altitude_array()
         self._update_link_array()
@@ -295,6 +306,46 @@ class LinkDescriptionManager():
         )
 
         return distance
+
+    def link2altitude[T: real_t | real_array_t](self, link_distance: T) -> T:
+        """Given a link distance, calculate the corresponding altitude for the current \
+            link configuration.
+
+        Args:
+            link_value (real_t or real_array_t): link distance to convert to altitude [m].
+
+        Returns:
+            real_t or real_array_t: corresponding altitude [m].
+        """
+
+        _altitude = self.earth_model.link_to_altitude(
+            link_array=link_distance,
+            sat_altitude=self.sat_altitude,
+            lct_altitude=self.lct_altitude,
+            zenith_angle=self.zenith_angle
+        )
+
+        return _altitude
+    
+    def altitude2link[T: real_t | real_array_t](self, altitude: T) -> T:
+        """Given an altitude, calculate the corresponding link distance for the current \
+            link configuration.
+
+        Args:
+            altitude (real_t or real_array_t): altitude to convert to link distance [m].
+
+        Returns:
+            real_t or real_array_t: corresponding link distance [m].
+        """
+
+        _link_distance = self.earth_model.altitude_to_link(
+            altitude_array=altitude,
+            sat_altitude=self.sat_altitude,
+            lct_altitude=self.lct_altitude,
+            zenith_angle=self.zenith_angle
+        )
+
+        return _link_distance
 
 if __name__ == "__main__":
     a = OpticalBeam.rx_spot_size
