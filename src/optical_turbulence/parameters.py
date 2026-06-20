@@ -197,6 +197,7 @@ def isonoplanatic_angle_UL(
         ris_model: Callable[[real_array_t], real_array_t],
         altitude_array: real_array_t,
         link_array: real_array_t,
+        link_distance: real_t | None = None,
         **_) -> np.float64:
     """Calculate the isoplanatic angle of an **uplink gaussian-beam wave**.
 
@@ -211,6 +212,8 @@ def isonoplanatic_angle_UL(
             corresponding to the different link values [m].
         link_array (real_array_t): distances following the on-axis line from \
             OGS to satellite. The indices match with the altitude array indices [m].
+        link_distance (real_t | None, optional): distance between the LCT and satellite [m]. If
+            the distance is not specified, it is calculated as the last value of link_array.
         _ (Any): consume all the extra keyword arguments [n/a].
 
     Returns:
@@ -222,7 +225,8 @@ def isonoplanatic_angle_UL(
 
     """
     # Since the link array goes from 0 (at OGS) to L (at satellite)
-    link_distance = link_array[-1]
+    if link_distance is None:
+        link_distance = link_array[-1]
 
     wavenumber_sq = np.pow( 2 * np.pi / wavelength, 2)
 
@@ -250,6 +254,7 @@ def fried_parameter_UL_TX(
         ris_model: Callable[[real_array_t], real_array_t],
         altitude_array: real_array_t,
         link_array: real_array_t,
+        link_distance: real_t | None = None,
         **_) -> np.float64:
     """Calculate the Fried paramater ($r_{0T}$) for an uplink beam, assuming an spherical wave \
         as seen from the transmitter.
@@ -262,6 +267,8 @@ def fried_parameter_UL_TX(
             corresponding to the different link values [m].
         link_array (real_array_t): distances following the on-axis line from \
             OGS to satellite. The indices match with the altitude array indices [m].
+        link_distance (real_t | None, optional): distance between the LCT and satellite [m]. If
+            the distance is not specified, it is calculated as the last value of link_array.
         _ (Any): consume all the extra keyword arguments [n/a].
 
     Returns:
@@ -274,7 +281,8 @@ def fried_parameter_UL_TX(
         [4] L. B. Stotts, M. Toyoshima, and L. C. Andrews, “Effect of satellite slew rate on bit error rate model under atmospheric turbulence,” Opt. Eng., vol. 64, no. 05, May 2025, doi: 10.1117/1.OE.64.5.058104.
     """
     # Since the link array goes from 0 (at OGS) to L (at satellite)
-    link_distance = link_array[-1]
+    if link_distance is None:
+        link_distance = link_array[-1]
 
     # divide
     left = 0.42 * np.pow(2 * np.pi / wavelength, 2)
@@ -293,6 +301,7 @@ def fried_parameter_UL_RX(
         ris_model: Callable[[real_array_t], real_array_t],
         altitude_array: real_array_t,
         link_array: real_array_t,
+        link_distance: real_t | None = None,
         **_) -> np.float64:
     """Calculate the Fried paramater ($r_{0R}$) for an uplink beam, assuming an spherical wave \
         as seen from the receiver.
@@ -305,6 +314,8 @@ def fried_parameter_UL_RX(
             corresponding to the different link values [m].
         link_array (real_array_t): distances following the on-axis line from \
             OGS to satellite. The indices match with the altitude array indices [m].
+        link_distance (real_t | None, optional): distance between the LCT and satellite [m]. If
+            the distance is not specified, it is calculated as the last value of link_array.
         _ (Any): consume all the extra keyword arguments [n/a].
 
     Returns:
@@ -317,7 +328,8 @@ def fried_parameter_UL_RX(
         [4] L. B. Stotts, M. Toyoshima, and L. C. Andrews, “Effect of satellite slew rate on bit error rate model under atmospheric turbulence,” Opt. Eng., vol. 64, no. 05, May 2025, doi: 10.1117/1.OE.64.5.058104.
     """
     # Since the link array goes from 0 (at OGS) to L (at satellite)
-    link_distance = link_array[-1]
+    if link_distance is None:
+        link_distance = link_array[-1]
 
     # divide
     left = 0.42 * np.pow(2 * np.pi / wavelength, 2)
@@ -336,6 +348,7 @@ def rytov_variance_UL_spherical(
         ris_model: Callable[[real_array_t], real_array_t],
         altitude_array: real_array_t,
         link_array: real_array_t,
+        link_distance: real_t | None = None,
         **_) -> np.float64:
     """Calculate the Rytov variance for the case of an **uplink spherical wave**.
 
@@ -350,6 +363,8 @@ def rytov_variance_UL_spherical(
             corresponding to the different link values [m].
         link_array (real_array_t): distances following the on-axis line from \
             OGS to satellite. The indices match with the altitude array indices [m].
+        link_distance (real_t | None, optional): distance between the LCT and satellite [m]. If
+            the distance is not specified, it is calculated as the last value of link_array.
         _ (Any): consume all the extra keyword arguments [n/a].
 
     Returns:
@@ -361,7 +376,8 @@ def rytov_variance_UL_spherical(
 
     """
     # Since the link array goes from 0 (at OGS) to L (at satellite)
-    link_distance = link_array[-1]
+    if link_distance is None:
+        link_distance = link_array[-1]
     wavenum = 2 * np.pi / wavelength
 
     # we divide into left and right to calculate
@@ -378,6 +394,7 @@ def scint_index_UL_spherical(
         ris_model: Callable[[real_array_t], real_array_t],
         altitude_array: real_array_t,
         link_array: real_array_t,
+        link_distance: real_t | None = None,
         **_) -> np.float64:
     """Calculate the scintillation index for the case of \
     a tracked **uplink** spherical wave being captured by a **point receiver** \
@@ -391,6 +408,8 @@ def scint_index_UL_spherical(
             corresponding to the different link values [m].
         link_array (real_array_t): distances following the on-axis line from \
             OGS to satellite. The indices match with the altitude array indices [m].
+        link_distance (real_t | None, optional): distance between the LCT and satellite [m]. If
+            the distance is not specified, it is calculated as the last value of link_array.
         _ (Any): consume all the extra keyword arguments [n/a].
 
     Returns:
@@ -406,7 +425,8 @@ def scint_index_UL_spherical(
         wavelength=wavelength,
         ris_model=ris_model,
         altitude_array=altitude_array,
-        link_array=link_array
+        link_array=link_array,
+        link_distance=link_distance
     )
 
     in_exp_1 = 0.49 * rytov_var / np.pow(1 + 0.56 * np.pow(rytov_var, 6/5), 7/6)
@@ -421,6 +441,7 @@ def rytov_variance_UL_gaussian(
         ris_model: Callable[[real_array_t], real_array_t],
         altitude_array: real_array_t,
         link_array: real_array_t,
+        link_distance: real_t | None = None,
         **_) -> np.float64:
     """Calculate the Rytov variance for the case of an **uplink collimated gaussian-beam wave**.
 
@@ -437,6 +458,8 @@ def rytov_variance_UL_gaussian(
             corresponding to the different link values [m].
         link_array (real_array_t): distances following the on-axis line from \
             OGS to satellite. The indices match with the altitude array indices [m].
+        link_distance (real_t | None, optional): distance between the LCT and satellite [m]. If
+            the distance is not specified, it is calculated as the last value of link_array.
         _ (Any): consume all the extra keyword arguments [n/a].
 
     Returns:
@@ -449,7 +472,8 @@ def rytov_variance_UL_gaussian(
     """
     # to not re-calculate
     # Since the link array goes from 0 (at OGS) to L (at satellite)
-    link_distance = link_array[-1]
+    if link_distance is None:
+        link_distance = link_array[-1]
 
     wavenum = 2 * np.pi / wavelength
     xi = 1 - ( link_array / link_distance )
@@ -471,6 +495,7 @@ def scint_index_UL_gaussian(
         ris_model: Callable[[real_array_t], real_array_t],
         altitude_array: real_array_t,
         link_array: real_array_t,
+        link_distance: real_t | None = None,
         **_) -> np.float64:
     """Calculate the scintillation index for the case of \
     a perfectly-tracked **uplink** gaussian wave being captured by a **point receiver** \
@@ -486,6 +511,8 @@ def scint_index_UL_gaussian(
             corresponding to the different link values [m].
         link_array (real_array_t): distances following the on-axis line from \
             OGS to satellite. The indices match with the altitude array indices [m].
+        link_distance (real_t | None, optional): distance between the LCT and satellite [m]. If
+            the distance is not specified, it is calculated as the last value of link_array.
         _ (Any): consume all the extra keyword arguments [n/a].
 
     Returns:
@@ -503,7 +530,8 @@ def scint_index_UL_gaussian(
         Theta=Theta,
         ris_model=ris_model,
         altitude_array=altitude_array,
-        link_array=link_array
+        link_array=link_array,
+        link_distance=link_distance
     )
 
     in_exp_1 = 0.49 * rytov_var / np.pow(1 + ( 1 + Theta ) * 0.56 * np.pow(rytov_var, 6/5), 7/6)
@@ -517,6 +545,7 @@ def _total_beam_wander_variance_UL_gaussian(
         ris_model: Callable[[real_array_t], real_array_t],
         altitude_array: real_array_t,
         link_array: real_array_t,
+        link_distance: real_t | None = None,
         **_) -> np.float64:
     """Calculate the uplink total-beam-wander variance ($\\langle r_c^2\rangle$) for a collimated or convergent beam
 
@@ -529,6 +558,8 @@ def _total_beam_wander_variance_UL_gaussian(
             corresponding to the different link values [m].
         link_array (real_array_t): distances following the on-axis line from \
             OGS to satellite. The indices match with the altitude array indices [m].
+        link_distance (real_t | None, optional): distance between the LCT and satellite [m]. If
+            the distance is not specified, it is calculated as the last value of link_array.
         _ (Any): consume all the extra keyword arguments [n/a].
 
     Returns:
@@ -540,7 +571,8 @@ def _total_beam_wander_variance_UL_gaussian(
 
     """
     # Since the link array goes from 0 (at OGS) to L (at satellite)
-    link_distance = link_array[-1]
+    if link_distance is None:
+        link_distance = link_array[-1]
 
     # divide in sides
     left = 7.25 * np.pow(link_distance, 2) / ( np.pow(beam_radius, 1/3) )
@@ -563,6 +595,7 @@ def _bw_pointing_error_var_UL_gaussian(
         ris_model: Callable[[real_array_t], real_array_t],
         altitude_array: real_array_t,
         link_array: real_array_t,
+        link_distance: real_t | None = None,
         **_) -> np.float64:
     """Calculate the beam-wander induced pointing-error variance for a collimated or convergent beam for \
         the uplink case. This pointing-error variance is NOT tracked/corrected and applies uniquely to LEO.
@@ -577,6 +610,8 @@ def _bw_pointing_error_var_UL_gaussian(
             corresponding to the different link values [m].
         link_array (real_array_t): distances following the on-axis line from \
             OGS to satellite. The indices match with the altitude array indices [m].
+        link_distance (real_t | None, optional): distance between the LCT and satellite [m]. If
+            the distance is not specified, it is calculated as the last value of link_array.
         _ (Any): consume all the extra keyword arguments [n/a].
 
     Returns:
@@ -592,14 +627,16 @@ def _bw_pointing_error_var_UL_gaussian(
         pfront_radius=pfront_radius,
         ris_model=ris_model,
         altitude_array=altitude_array,
-        link_array=link_array
+        link_array=link_array,
+        link_distance=link_distance
     )
     
     tx_fried_param = fried_parameter_UL_TX(
         wavelength=wavelength,
         ris_model=ris_model,
         altitude_array=altitude_array,
-        link_array=link_array
+        link_array=link_array,
+        link_distance=link_distance
     )
 
     # pre-calculate
@@ -617,6 +654,7 @@ def _bw_pointing_error_var_UL_gaussian_TT(
         ris_model: Callable[[real_array_t], real_array_t],
         altitude_array: real_array_t,
         link_array: real_array_t,
+        link_distance: real_t | None = None,
         **_) -> np.float64:
     """Calculate the beam-wander induced pointing-error variance for a collimated or convergent beam for \
         the tilt-corrected uplink case. This pointing-error variance IS tilt-corrected and applies uniquely to LEO.
@@ -631,6 +669,8 @@ def _bw_pointing_error_var_UL_gaussian_TT(
             corresponding to the different link values [m].
         link_array (real_array_t): distances following the on-axis line from \
             OGS to satellite. The indices match with the altitude array indices [m].
+        link_distance (real_t | None, optional): distance between the LCT and satellite [m]. If
+            the distance is not specified, it is calculated as the last value of link_array.
         _ (Any): consume all the extra keyword arguments [n/a].
 
     Returns:
@@ -646,19 +686,22 @@ def _bw_pointing_error_var_UL_gaussian_TT(
         pfront_radius=pfront_radius,
         ris_model=ris_model,
         altitude_array=altitude_array,
-        link_array=link_array
+        link_array=link_array,
+        link_distance=link_distance
     )
     
     tx_fried_param = fried_parameter_UL_TX(
         wavelength=wavelength,
         ris_model=ris_model,
         altitude_array=altitude_array,
-        link_array=link_array
+        link_array=link_array,
+        link_distance=link_distance
     )
 
     # pre-calculate
     radius_to_fried_sq_LEO = np.pow( np.pi * beam_radius / tx_fried_param, 2)
-    link_distance = link_array[-1]
+    if link_distance is None:
+        link_distance = link_array[-1]
 
     # Calculate zernike tilt variance and the two terms separately
     zernike_tilt_variance = 0.57 * ( wavelength / (2 * beam_radius) ) * np.pow(2 * beam_radius / tx_fried_param, 5/6)
@@ -678,6 +721,7 @@ def scint_index_UL_untracked_gaussian(
         ris_model: Callable[[real_array_t], real_array_t],
         altitude_array: real_array_t,
         link_array: real_array_t,
+        link_distance: real_t | None = None,
         **_) -> np.float64:
     """Calculate the scintillation index for the case of \
     an **untracked uplink** collimated or convergent wave being captured by a **point receiver** \
@@ -696,6 +740,8 @@ def scint_index_UL_untracked_gaussian(
             corresponding to the different link values [m].
         link_array (real_array_t): distances following the on-axis line from \
             OGS to satellite. The indices match with the altitude array indices [m].
+        link_distance (real_t | None, optional): distance between the LCT and satellite [m]. If
+            the distance is not specified, it is calculated as the last value of link_array.
         _ (Any): consume all the extra keyword arguments [n/a].
 
     Returns:
@@ -713,7 +759,8 @@ def scint_index_UL_untracked_gaussian(
         wavelength=wavelength,
         ris_model=ris_model,
         altitude_array=altitude_array,
-        link_array=link_array
+        link_array=link_array,
+        link_distance=link_distance
     )
 
     perror_variance = _bw_pointing_error_var_UL_gaussian(
@@ -722,7 +769,8 @@ def scint_index_UL_untracked_gaussian(
         pfront_radius=pfront_radius,
         ris_model=ris_model,
         altitude_array=altitude_array,
-        link_array=link_array
+        link_array=link_array,
+        link_distance=link_distance
     )
 
     rytov_var = rytov_variance_UL_gaussian(
@@ -731,11 +779,14 @@ def scint_index_UL_untracked_gaussian(
         Theta=Theta,
         ris_model=ris_model,
         altitude_array=altitude_array,
-        link_array=link_array
+        link_array=link_array,
+        link_distance=link_distance
     )
 
     # link array goes from 0 to L
-    link_distance = link_array[-1]
+    if link_distance is None:
+        link_distance = link_array[-1]
+    
     wavenum = 2 * np.pi / wavelength
 
     # separate in the sum
@@ -758,6 +809,7 @@ def scint_index_UL_tracked_gaussian(
         ris_model: Callable[[real_array_t], real_array_t],
         altitude_array: real_array_t,
         link_array: real_array_t,
+        link_distance: real_t | None = None,
         **_) -> np.float64:
     """Calculate the scintillation index for the case of \
     a **tracked uplink** collimated or convergent wave being captured by a **point receiver** \
@@ -776,6 +828,8 @@ def scint_index_UL_tracked_gaussian(
             corresponding to the different link values [m].
         link_array (real_array_t): distances following the on-axis line from \
             OGS to satellite. The indices match with the altitude array indices [m].
+        link_distance (real_t | None, optional): distance between the LCT and satellite [m]. If
+            the distance is not specified, it is calculated as the last value of link_array.
         _ (Any): consume all the extra keyword arguments [n/a].
 
     Returns:
@@ -793,7 +847,8 @@ def scint_index_UL_tracked_gaussian(
         wavelength=wavelength,
         ris_model=ris_model,
         altitude_array=altitude_array,
-        link_array=link_array
+        link_array=link_array,
+        link_distance=link_distance
     )
 
     perror_variance = _bw_pointing_error_var_UL_gaussian_TT(
@@ -802,7 +857,8 @@ def scint_index_UL_tracked_gaussian(
         pfront_radius=pfront_radius,
         ris_model=ris_model,
         altitude_array=altitude_array,
-        link_array=link_array
+        link_array=link_array,
+        link_distance=link_distance
     )
 
     rytov_var = rytov_variance_UL_gaussian(
@@ -811,11 +867,14 @@ def scint_index_UL_tracked_gaussian(
         Theta=Theta,
         ris_model=ris_model,
         altitude_array=altitude_array,
-        link_array=link_array
+        link_array=link_array,
+        link_distance=link_distance
     )
 
     wavenum = 2 * np.pi / wavelength
-    link_distance = link_array[-1]
+    
+    if link_distance is None:
+        link_distance = link_array[-1]
 
     # Long-term spot/beam radius for H >> 20 km ([2] p. 180)
     lt_spot_radius = rx_spot_size * np.pow( 1 + np.pow( 2 * np.sqrt(2) * beam_radius / tx_fried_radius, 5/3) , 3/5 )
