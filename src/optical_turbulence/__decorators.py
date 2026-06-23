@@ -3,6 +3,9 @@ import warnings
 # ----------------- DECORATORS ----------------- #
 #region Decorators
 
+def _warning_formatter(message, category, filename, lineno, line=None):
+    return '[\033[33mWARN\033[0m:\033[33m%s\033[0m] %s\n' % (category.__name__, message)
+
 _untested_funcs = list()
 def warn_not_tested(func): 
     """Warn that the function has not been tested against literature when run
@@ -14,7 +17,7 @@ def warn_not_tested(func):
     def inner1(*args, **kwargs):
 
         if func.__name__ not in _untested_funcs:
-            warnings.warn("\033[33m" + f"[WARN - {func.__name__}] This function has not been tested against literature results." + "\033[0m")
+            warnings.warn(f"[\033[1;35m{func.__name__}\033[0m]] This function has not been tested against literature results.")
             _untested_funcs.append(func.__name__)
 
         # calling the actual function now 
