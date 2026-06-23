@@ -26,7 +26,7 @@ def warn_not_tested(func):
     def inner1(*args, **kwargs):
 
         if func.__name__ not in _untested_funcs:
-            warnings.warn(f"[\033[1;35m{func.__name__}\033[0m]] This function has not been tested against literature results.")
+            warnings.warn(f"[\033[1;35m{func.__name__}\033[0m] This function has not been tested against literature results.")
             _untested_funcs.append(func.__name__)
 
         # calling the actual function now 
