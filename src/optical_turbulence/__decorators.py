@@ -1,10 +1,19 @@
 import warnings
+from typing import Optional, Type, Union
 
 # ----------------- DECORATORS ----------------- #
 #region Decorators
 
-def _warning_formatter(message, category, filename, lineno, line=None):
+def _warning_formatter(
+    message: Union[Warning, str],
+    category: Type[Warning],
+    filename: str,
+    lineno: int,
+    line: Optional[str] = None,
+) -> str:
     return '[\033[33mWARN\033[0m:\033[33m%s\033[0m] %s\n' % (category.__name__, message)
+
+warnings.formatwarning = _warning_formatter # ty:ignore[invalid-assignment]
 
 _untested_funcs = list()
 def warn_not_tested(func): 
