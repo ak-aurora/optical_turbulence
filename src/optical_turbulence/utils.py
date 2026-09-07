@@ -28,11 +28,11 @@ def FWHM_angle_to_beam_radius(wavelength: real_t, FWHM_angle: real_t):
 
     return radius
 
-METHODS = Literal["linspace", "ITU-R P.1621-2", "detailed_atmos"]
+ALT_FACT_METHODS = Literal["linspace", "ITU-R P.1621-2", "detailed_atmos"]
 def create_altitude_array(
         sat_altitude: real_t,
         lct_altitude: real_t = 0,
-        method: METHODS = "linspace",
+        method: ALT_FACT_METHODS = "linspace",
         **_) -> npt.NDArray[np.float64]:
     """Create an array for altitudes above the LCT/OGS altitude until a maximum
     value.
@@ -70,8 +70,11 @@ def create_altitude_array(
             altitude_array = altitude_array[altitude_array >= lct_altitude]
 
         case "detailed_atmos":
-            in_atmos = np.linspace(lct_altitude, 20e3, int( (20e3 - lct_altitude) * 100 ), endpoint=False)
-            out_atmos = np.linspace(20e3, sat_altitude, int( (sat_altitude - 20e3) / 100 ) + 1, endpoint=True)
-            altitude_array = np.concatenate((in_atmos, out_atmos))
+            if sat_altitude < 20e3:
+                altitude_array = np.linspace(lct_altitude, sat_altitude, int( (sat_altitude - lct_altitude) * 100 ) + 1, endpoint=True)
+            else:
+                in_atmos = np.linspace(lct_altitude, 20e3, int( (20e3 - lct_altitude) * 100 ), endpoint=False)
+                out_atmos = np.linspace(20e3, sat_altitude, int( (sat_altitude - 20e3) / 100 ) + 1, endpoint=True)
+                altitude_array = np.concatenate((in_atmos, out_atmos))
 
     return altitude_array
