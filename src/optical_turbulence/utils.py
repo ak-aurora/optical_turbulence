@@ -28,7 +28,7 @@ def FWHM_angle_to_beam_radius(wavelength: real_t, FWHM_angle: real_t):
 
     return radius
 
-METHODS = Literal["linspace", "ITU-R P.1621-2"]
+METHODS = Literal["linspace", "ITU-R P.1621-2", "detailed_atmos"]
 def create_altitude_array(
         sat_altitude: real_t,
         lct_altitude: real_t = 0,
@@ -45,6 +45,7 @@ def create_altitude_array(
             definition of the slicing. Options:
             - linspace: the altitude between LCT and SAT is sliced into 1 m intervals.
             - ITU-R P.1621-2: the altitude follows the recommendation of ITU-R P.1621-2 (available online)
+            - detailed_atmos: from 0 to 20 km, the atmosphere is sliced into 1 cm intervals. Above that, it is sliced in 100 m intervals.
 
     Returns:
         npt.NDArray[np.float64]: array with distances
@@ -67,5 +68,10 @@ def create_altitude_array(
             slices = np.exp( ( indices - 1 ) / 20 )
             altitude_array = np.cumsum(slices)
             altitude_array = altitude_array[altitude_array >= lct_altitude]
+
+        case "detailed_atmos":
+            in_atmos = np.linspace(lct_altitude, 20e3, int( (20e3 - lct_altitude) * 100 ), endpoint=False)
+            out_atmos = np.linspace(20e3, sat_altitude, int( (sat_altitude - 20e3) / 100 ) + 1, endpoint=True)
+            altitude_array = np.concatenate((in_atmos, out_atmos))
 
     return altitude_array

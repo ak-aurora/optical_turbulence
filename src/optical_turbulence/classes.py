@@ -179,7 +179,7 @@ class LinkDescriptionArrays(TypedDict):
     altitude_array: npt.NDArray[np.float64]
     link_array: npt.NDArray[np.float64]
 
-class LinkDescriptionManager():
+class LinkDescriptionManager:
     """Manage the link, auto calculating relevant values in case of an update"""
 
     def __init__(
@@ -211,6 +211,8 @@ class LinkDescriptionManager():
         else:
             self.earth_model = earth_model
 
+        # We care about altitude array because we assume the satellite will change altitude
+        # less frequently than the zenith angle will change
         if altitude_array_factory is None:
             self.altitude_array_factory = create_altitude_array
         else:
