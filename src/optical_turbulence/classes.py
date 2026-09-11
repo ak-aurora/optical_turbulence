@@ -3,8 +3,9 @@ Classes to facilitate the use of the library
 """
 
 import warnings
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable, TypedDict
+from typing import TypedDict
 
 import numpy as np
 import numpy.typing as npt
