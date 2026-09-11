@@ -53,6 +53,9 @@ def create_altitude_array(
     TODO:
         Implement more ways to generate the points (so its not necessarily always linear)
     """
+
+    if lct_altitude < sat_altitude:
+        raise AssertionError(f"The satellite altitude ({sat_altitude/1e3:0.f} km) cannot be less than the LCT altitude ({lct_altitude/1e3:0.f} km)")
     
     match method:
         case "linspace":
@@ -76,5 +79,8 @@ def create_altitude_array(
                 in_atmos = np.linspace(lct_altitude, 20e3, int( (20e3 - lct_altitude) * 100 ), endpoint=False)
                 out_atmos = np.linspace(20e3, sat_altitude, int( (sat_altitude - 20e3) / 100 ) + 1, endpoint=True)
                 altitude_array = np.concatenate((in_atmos, out_atmos))
+
+        case _:
+            raise ValueError(f"The option {method} is not valid.")
 
     return altitude_array
