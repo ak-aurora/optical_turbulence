@@ -55,7 +55,7 @@ def create_altitude_array(
     """
 
     if lct_altitude < sat_altitude:
-        raise AssertionError(f"The satellite altitude ({sat_altitude/1e3:0.f} km) cannot be less than the LCT altitude ({lct_altitude/1e3:0.f} km)")
+        raise AssertionError(f"The satellite altitude ({sat_altitude/1e3:.0f} km) cannot be less than the LCT altitude ({lct_altitude/1e3:.0f} km)")
     
     match method:
         case "linspace":
