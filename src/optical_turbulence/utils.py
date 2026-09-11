@@ -54,7 +54,7 @@ def create_altitude_array(
         Implement more ways to generate the points (so its not necessarily always linear)
     """
 
-    if lct_altitude < sat_altitude:
+    if sat_altitude < lct_altitude:
         raise AssertionError(f"The satellite altitude ({sat_altitude/1e3:.0f} km) cannot be less than the LCT altitude ({lct_altitude/1e3:.0f} km)")
     
     match method:
