@@ -34,7 +34,6 @@ class Distribution(ABC):
         Returns:
             tuple[real_t, real_t]: minimum, maximum value
         """
-        pass
 
 
 SAMPLER_SIGNATURE = Callable[[int| tuple[int, ...]], float | np.typing.NDArray[np.float64]]

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from .typing import real_t, real_array_t
+from .typing import real_array_t, real_t
 
 # ----------------- CONSTANTS ----------------- #
 
@@ -33,7 +33,6 @@ class EarthModelGeneric(ABC):
             real_array_t: array with the corresponding link distances for the given altitudes [m].
         """
         
-        pass
 
 
     @staticmethod
@@ -57,7 +56,6 @@ class EarthModelGeneric(ABC):
             real_array_t: array with the corresponding altitudes for the given link distances [m].
         """
 
-        pass
 
     
     @staticmethod
@@ -77,7 +75,6 @@ class EarthModelGeneric(ABC):
             real_t: distance from the LCT/OGS to the satellite [m].
         """
         
-        pass
 
 
 # ----------------- MODEL IMPLEMENTATIONS ----------------- #

@@ -7,7 +7,7 @@ __author__ = "Agustín González Uriarte"
 
 # ----------------- IMPORTS ----------------- #
 
-from typing import Callable
+from collections.abc import Callable
 
 import numpy as np
 from scipy import integrate
@@ -225,12 +225,11 @@ def isonoplanatic_angle_UL(
 
     """
     # Since the link array goes from 0 (at OGS) to L (at satellite)
-    if link_distance is None:
-        link_distance = link_array[-1]
+    l_distance: real_t = link_array[-1] if link_distance is None else link_distance
 
     wavenumber_sq = np.pow( 2 * np.pi / wavelength, 2)
 
-    mu_frac = link_array / link_distance
+    mu_frac = link_array / l_distance
 
     mu1u = integrate.simpson(ris_model(altitude_array) * 
         np.pow( Theta + neg_Theta * mu_frac , 5/3 ),
@@ -242,7 +241,7 @@ def isonoplanatic_angle_UL(
         link_array
     )
 
-    outside_pow = np.pow( link_distance, -1 )
+    outside_pow = np.pow( l_distance, -1 )
     inside_pow = 2.91 * wavenumber_sq * (mu1u + 0.62 * mu2u * np.pow( Lambda, 11/6 ))
     pow_term = np.pow( inside_pow, -3/5 )
 
@@ -281,14 +280,13 @@ def fried_parameter_UL_TX(
         [4] L. B. Stotts, M. Toyoshima, and L. C. Andrews, “Effect of satellite slew rate on bit error rate model under atmospheric turbulence,” Opt. Eng., vol. 64, no. 05, May 2025, doi: 10.1117/1.OE.64.5.058104.
     """
     # Since the link array goes from 0 (at OGS) to L (at satellite)
-    if link_distance is None:
-        link_distance = link_array[-1]
+    l_distance: real_t = link_array[-1] if link_distance is None else link_distance
 
     # divide
     left = 0.42 * np.pow(2 * np.pi / wavelength, 2)
     
     right = integrate.simpson( 
-        ris_model(altitude_array) * np.pow(1 - link_array / link_distance, 5/3),
+        ris_model(altitude_array) * np.pow(1 - link_array / l_distance, 5/3),
         link_array
     )
 
@@ -328,14 +326,13 @@ def fried_parameter_UL_RX(
         [4] L. B. Stotts, M. Toyoshima, and L. C. Andrews, “Effect of satellite slew rate on bit error rate model under atmospheric turbulence,” Opt. Eng., vol. 64, no. 05, May 2025, doi: 10.1117/1.OE.64.5.058104.
     """
     # Since the link array goes from 0 (at OGS) to L (at satellite)
-    if link_distance is None:
-        link_distance = link_array[-1]
+    l_distance: real_t = link_array[-1] if link_distance is None else link_distance
 
     # divide
     left = 0.42 * np.pow(2 * np.pi / wavelength, 2)
 
     right = integrate.simpson( 
-        ris_model(altitude_array) * np.pow( link_array / link_distance, 5/3),
+        ris_model(altitude_array) * np.pow( link_array / l_distance, 5/3),
         link_array
     )
 
@@ -376,13 +373,13 @@ def rytov_variance_UL_spherical(
 
     """
     # Since the link array goes from 0 (at OGS) to L (at satellite)
-    if link_distance is None:
-        link_distance = link_array[-1]
+    l_distance: real_t = link_array[-1] if link_distance is None else link_distance
+
     wavenum = 2 * np.pi / wavelength
 
     # we divide into left and right to calculate
     left = 2.25 * np.pow(wavenum, 7/6)
-    inner_right = ris_model(altitude_array) * np.pow(link_array, 5/6) * np.pow(1 - link_array / link_distance, 5/6)
+    inner_right = ris_model(altitude_array) * np.pow(link_array, 5/6) * np.pow(1 - link_array / l_distance, 5/6)
     right = integrate.simpson(inner_right, link_array)
 
     return left * right
@@ -472,15 +469,14 @@ def rytov_variance_UL_gaussian(
     """
     # to not re-calculate
     # Since the link array goes from 0 (at OGS) to L (at satellite)
-    if link_distance is None:
-        link_distance = link_array[-1]
+    l_distance: real_t = link_array[-1] if link_distance is None else link_distance
 
     wavenum = 2 * np.pi / wavelength
-    xi = 1 - ( link_array / link_distance )
+    xi = 1 - ( link_array / l_distance )
     neg_Theta = 1 - Theta
     
     # divide by sectors
-    left = 8.70 * np.pow(wavenum, 7/6) * np.pow(link_distance, 5/6)
+    left = 8.70 * np.pow(wavenum, 7/6) * np.pow(l_distance, 5/6)
 
     right_in = np.pow(xi, 5/6) * np.pow(Lambda * xi + 1j * (1 - neg_Theta * xi), 5/6) - np.pow(Lambda, 5/6) * np.pow(xi, 5/3)
     right = integrate.simpson(ris_model(altitude_array) * right_in, link_array)
@@ -571,13 +567,12 @@ def _total_beam_wander_variance_UL_gaussian(
 
     """
     # Since the link array goes from 0 (at OGS) to L (at satellite)
-    if link_distance is None:
-        link_distance = link_array[-1]
+    l_distance: real_t = link_array[-1] if link_distance is None else link_distance
 
     # divide in sides
-    left = 7.25 * np.pow(link_distance, 2) / ( np.pow(beam_radius, 1/3) )
+    left = 7.25 * np.pow(l_distance, 2) / ( np.pow(beam_radius, 1/3) )
 
-    right_in1 = np.pow(1 - link_array / link_distance , 2)
+    right_in1 = np.pow(1 - link_array / l_distance , 2)
     right_in2 = np.pow(np.abs( 1 - link_array / (pfront_radius) ), 1/3)
 
     right = integrate.simpson(
@@ -700,12 +695,11 @@ def _bw_pointing_error_var_UL_gaussian_TT(
 
     # pre-calculate
     radius_to_fried_sq_LEO = np.pow( np.pi * beam_radius / tx_fried_param, 2)
-    if link_distance is None:
-        link_distance = link_array[-1]
+    l_distance: real_t = link_array[-1] if link_distance is None else link_distance
 
     # Calculate zernike tilt variance and the two terms separately
     zernike_tilt_variance = 0.57 * ( wavelength / (2 * beam_radius) ) * np.pow(2 * beam_radius / tx_fried_param, 5/6)
-    first_term = np.pow(np.sqrt(beam_wander_variance) - zernike_tilt_variance * link_distance, 2)
+    first_term = np.pow(np.sqrt(beam_wander_variance) - zernike_tilt_variance * l_distance, 2)
     second_term = 1 - np.pow( radius_to_fried_sq_LEO / (1 + radius_to_fried_sq_LEO), 1/6 )
 
     return first_term * second_term
@@ -784,13 +778,12 @@ def scint_index_UL_untracked_gaussian(
     )
 
     # link array goes from 0 to L
-    if link_distance is None:
-        link_distance = link_array[-1]
+    l_distance: real_t = link_array[-1] if link_distance is None else link_distance
     
     wavenum = 2 * np.pi / wavelength
 
     # separate in the sum
-    left = 34.29 * np.pow( Lambda * link_distance / ( wavenum * np.pow(tx_fried_radius, 2) ), 5/6 ) * ( perror_variance / np.pow(rx_spot_size, 2) )
+    left = 34.29 * np.pow( Lambda * l_distance / ( wavenum * np.pow(tx_fried_radius, 2) ), 5/6 ) * ( perror_variance / np.pow(rx_spot_size, 2) )
     
     right_1 = 0.49 * rytov_var / np.pow( 1 + (1 + Theta) * 0.56 * np.pow(rytov_var, 6/5), 7/6 )
     right_2 = 0.51 * rytov_var / np.pow( 1 + 0.69 * np.pow(rytov_var, 6/5), 5/6 )
@@ -872,18 +865,17 @@ def scint_index_UL_tracked_gaussian(
     )
 
     wavenum = 2 * np.pi / wavelength
-    
-    if link_distance is None:
-        link_distance = link_array[-1]
+
+    l_distance: real_t = link_array[-1] if link_distance is None else link_distance
 
     # Long-term spot/beam radius for H >> 20 km ([2] p. 180)
     lt_spot_radius = rx_spot_size * np.pow( 1 + np.pow( 2 * np.sqrt(2) * beam_radius / tx_fried_radius, 5/3) , 3/5 )
 
     # Long-term diffractive parameter ([2] p. 182)
-    lt_Lambda = 2 * link_distance / ( wavenum * np.pow(lt_spot_radius, 2) )
+    lt_Lambda = 2 * l_distance / ( wavenum * np.pow(lt_spot_radius, 2) )
 
     # separate in the sum
-    left = 34.29 * np.pow( lt_Lambda * link_distance / ( wavenum * np.pow(tx_fried_radius, 2) ), 5/6 ) * ( perror_variance / np.pow(lt_spot_radius, 2) )
+    left = 34.29 * np.pow( lt_Lambda * l_distance / ( wavenum * np.pow(tx_fried_radius, 2) ), 5/6 ) * ( perror_variance / np.pow(lt_spot_radius, 2) )
     right_1 = 0.49 * rytov_var / np.pow( 1 + (1 + Theta) * 0.56 * np.pow(rytov_var, 6/5), 7/6 )
     right_2 = 0.51 * rytov_var / np.pow( 1 + 0.69 * np.pow(rytov_var, 6/5), 5/6 )
     right = np.exp(right_1 + right_2) - 1

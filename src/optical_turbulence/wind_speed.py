@@ -4,8 +4,10 @@ Wind speed models for the RIS models.
 
 import numpy as np
 from scipy import integrate
-from .typing import real_t, real_array_t
+
 from .__decorators import warn_not_tested
+from .typing import real_array_t, real_t
+
 
 @warn_not_tested # No results identified in literature
 def bufton_model(height: real_array_t | real_t, slew_rate, ground_speed) -> real_array_t | real_t:

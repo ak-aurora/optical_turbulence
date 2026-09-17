@@ -11,6 +11,9 @@ from .typing import real_array_t, real_t
 HAP_GND_HEIGHT = 5 # [m]
 HAP_REF_HEIGHT = 2 # [m]  
 
+DEFAULT_RMS_WIND_SPEED = np.float64(21)
+DEFAULT_A = np.float64(1.7e-14)
+DEFAULT_M = np.float64(1)
 
 # ---------------------------------------
 #   Hufnagel Valley model
@@ -19,15 +22,15 @@ HAP_REF_HEIGHT = 2 # [m]
 
 def hufnagel_valley_model[T: real_t | real_array_t](
         altitude: T, 
-        rms_wind_speed: real_t = np.float64(21), 
-        A: real_t = np.float64(1.7e-14)) -> T:
+        rms_wind_speed: real_t = DEFAULT_RMS_WIND_SPEED, 
+        A: real_t = DEFAULT_A) -> T:
     """Calculate the refractive-index structure ($C_n^2$) using the Hufnagel-Valley\
     boundary model. If the wind and A parameters are not given, the HV5/7 model is used.
 
     Args:
         altitude (real_array_t or real_t): altitude above ground [m]. If an array is given, an array is returned.
-        rms_wind_speed (real_t): root-mean-square wind speed [m/s].
-        A (real_t): nominal value of the refractive-index structure at the ground [m^(-2/3)]
+        rms_wind_speed (real_t): root-mean-square wind speed [m/s]. Defaults to 21 m/s.
+        A (real_t): nominal value of the refractive-index structure at the ground [m^(-2/3)]. Defaults to 1.7e-14.
 
     Returns:
         out (np.float64 or np.array[np.float64]): The refractive-index structure for the given input [m^(-2/3)].
@@ -56,17 +59,17 @@ def hufnagel_valley_model[T: real_t | real_array_t](
 
 def hap_model_daytime[T: real_t | real_array_t](
         altitude: T, 
-        rms_wind_speed: real_t = np.float64(21), 
-        A: real_t = np.float64(1.7e-14),
-        M: real_t = np.float64(1), **_) -> T:
+        rms_wind_speed: real_t = DEFAULT_RMS_WIND_SPEED, 
+        A: real_t = DEFAULT_A,
+        M: real_t = DEFAULT_M, **_) -> T:
     """Calculate the refractive-index structure ($C_n^2$) using the Hufnagel-Andrews-Phillips\
     boundary model for **daytime**. If the wind and A parameters are not given, the HV5/7 model parameters \
         are used.
 
     Args:
         altitude (real_array_t or real_t): altitude above ground [m]. If an array is given, an array is returned.
-        rms_wind_speed (real_t): root-mean-square wind speed [m/s].
-        A (real_t): nominal value of the refractive-index structure at the LCT altitude [m^(-2/3)]
+        rms_wind_speed (real_t): root-mean-square wind speed [m/s]. Defaults to 21 m/s.
+        A (real_t): nominal value of the refractive-index structure at the LCT altitude [m^(-2/3)]. Defaults to 1.7e-14.
         M (real_t): multiplicative factor [unitless]. Defaults to 1.
 
     Returns:
@@ -105,17 +108,17 @@ def hap_model_daytime[T: real_t | real_array_t](
 # @warn_not_tested # missing a plot to compare with
 def hap_model_nightime[T: real_t | real_array_t](
         altitude: T, 
-        rms_wind_speed: real_t = np.float64(21), 
-        A: real_t = np.float64(1.7e-14),
-        M: real_t = np.float64(1), **_) -> T:
+        rms_wind_speed: real_t = DEFAULT_RMS_WIND_SPEED, 
+        A: real_t = DEFAULT_A,
+        M: real_t = DEFAULT_M, **_) -> T:
     """Calculate the refractive-index structure ($C_n^2$) using the Hufnagel-Andrews-Phillips\
     boundary model for **nighttime**. If the wind and A parameters are not given, the HV5/7 model parameters \
         are used.
 
     Args:
         altitude (real_array_t or real_t): altitude above ground [m]. If an array is given, an array is returned.
-        rms_wind_speed (real_t): root-mean-square wind speed [m/s].
-        A (real_t): nominal value of the refractive-index structure at the LCT altitude [m^(-2/3)]
+        rms_wind_speed (real_t): root-mean-square wind speed [m/s]. Defaults to 21 m/s.
+        A (real_t): nominal value of the refractive-index structure at the LCT altitude [m^(-2/3)]. Defaults to 1.7e-14.
         lct_altitude (real_t): altitude of the Laser Communication Terminal [m] (if altitude is an array, \
             the default value is min(altitude), if it is a scalar, the default value is altitude / 2) 
         M (real_t): multiplicative factor [unitless]. Defaults to 1.

@@ -28,7 +28,7 @@ def FWHM_angle_to_beam_radius(wavelength: real_t, FWHM_angle: real_t):
 
     return radius
 
-ALT_FACT_METHODS = Literal["linspace", "ITU-R P.1621-2", "detailed_atmos"]
+type ALT_FACT_METHODS = Literal["linspace", "ITU-R P.1621-2", "detailed_atmos"]
 def create_altitude_array(
         sat_altitude: real_t,
         lct_altitude: real_t = 0,
