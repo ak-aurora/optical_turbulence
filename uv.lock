@@ -190,7 +190,7 @@ wheels = [
 
 [[package]]
 name = "optical-turbulence"
-version = "1.0.2.dev5"
+version = "1.0.2.dev6"
 source = { editable = "." }
 dependencies = [
     { name = "colorama" },

@@ -23,7 +23,7 @@ The order of the arguments is:
 
 In case of weak turbulence, scintillation index for a plane wave (downlink) can be written as
 
-$$\sigma_{I}^{2} = \sigma_{R}^{2} = 2.25 k^{7/6} \int_{0}^{L} C_{n}^{2}(h(z)) z^{5/6}\, dz$$
+$$\sigma_{I}^{2} = \sigma_{R}^{2} = 2.25 k^{7/6} \int_{0}^{L} C_{n}^{2}(h(z)) z^{5/6} dz$$
 
 ### `scint_index_DL_PR_general`
 
@@ -33,7 +33,7 @@ with $0 \leq \sigma_R^2 < \infty$
 
 
 ### `scint_index_DL_AA_general`
-$$\sigma_I^2\left(D_G\right)= 8.70 k^{7 / 6}\times \mathrm{Re} \left\lbrace\int_{0}^L C_n^2(h(z))\left[\left(\frac{k D_G^2}{16}+i z\right)^{5 / 6}-\left(\frac{k D_G^2}{16}\right)^{5 / 6}\right]\, d z\right\rbrace$$
+$$\sigma_I^2\left(D_G\right)= 8.70 k^{7 / 6}\times \mathrm{Re} \left\lbrace\int_{0}^L C_n^2(h(z))\left[\left(\frac{k D_G^2}{16}+i z\right)^{5 / 6}-\left(\frac{k D_G^2}{16}\right)^{5 / 6}\right] d z\right\rbrace$$
 
 where $D_G$ is the "hard aperture" diameter of the receiver lens. It is important to note that aperture averaging occurs when the aperture of the receiver is sufficiently large, i.e. larger than the transverse irradiance correlation width.
 
@@ -49,8 +49,8 @@ with
 
 $$
 \begin{align}
-\mu_{1u} = &\int_{0}^{L} C_n^2(h(z)) \left[\Theta + \bar{\Theta} \left( \frac{z}{L} \right) \right] ^{5/3}\, dz\\
-\mu_{2u} = &\int_{0}^L C_n^2(h(z)) \left( 1 - \frac{z}{L} \right) ^{5/3}\, dz
+\mu_{1u} = &\int_{0}^{L} C_n^2(h(z)) \left[\Theta + \bar{\Theta} \left( \frac{z}{L} \right) \right] ^{5/3} dz\\
+\mu_{2u} = &\int_{0}^L C_n^2(h(z)) \left( 1 - \frac{z}{L} \right) ^{5/3} dz
 \end{align}
 $$
 
@@ -58,17 +58,17 @@ $$
 
 The Fried parameter for a spherical wave seen from the transmitter is
 
-$$r_{0T} = \left[0.42k^2\int_{0}^{L}C_n^2(h(z))\left(1-\frac{z}{L}\right)^{5/3}\,dz\right]^{-3/5}$$
+$$r_{0T} = \left[0.42k^2\int_{0}^{L}C_n^2(h(z))\left(1-\frac{z}{L}\right)^{5/3}dz\right]^{-3/5}$$
 
 ### `fried_parameter_UL_RX`
 
 The Fried parameter for a spherical wave seen from the receiver is
 
-$$r_{0R} = \left[0.42k^2\int_{0}^{L}C_n^2(h(z))\left(\frac{z}{L}\right)^{5/3}\,dz\right]^{-3/5}$$
+$$r_{0R} = \left[0.42k^2\int_{0}^{L}C_n^2(h(z))\left(\frac{z}{L}\right)^{5/3}dz\right]^{-3/5}$$
 
 ### `rytov_variance_UL_spherical `
 
-$$\sigma_{B u}^2 =  2.25 k^{7 / 6} \int_{0}^L C_n^2(h(z))z^{5/6}\left(1-\frac{z}{L}\right)^{5/6}\,dz$$
+$$\sigma_{B u}^2 =  2.25 k^{7 / 6} \int_{0}^L C_n^2(h(z))z^{5/6}\left(1-\frac{z}{L}\right)^{5/6}dz$$
 
 ### `scint_index_UL_spherical`
 
@@ -76,7 +76,7 @@ $$\sigma_{I,sph}^{2} = \exp \left\lbrace\frac{0.49 \sigma_{B u}^2}{\left[1+ 0.56
 
 ### `rytov_variance_UL_gaussian`
 
-$$\sigma_{B u}^2 =  8.70 k^{7 / 6}L^{5 / 6} \times \mathrm{Re} \left\lbrace\int_{0}^L C_n^2(h(z))\left[\xi^{5 / 6}[\Lambda \xi+i(1-\bar{\Theta} \xi)]^{5 / 6}-\Lambda^{5 / 6} \xi^{5 / 3}\right]\, dz\right\rbrace$$
+$$\sigma_{B u}^2 =  8.70 k^{7 / 6}L^{5 / 6} \times \mathrm{Re} \left\lbrace\int_{0}^L C_n^2(h(z))\left[\xi^{5 / 6}[\Lambda \xi+i(1-\bar{\Theta} \xi)]^{5 / 6}-\Lambda^{5 / 6} \xi^{5 / 3}\right] dz\right\rbrace$$
 
 where $$\xi= 1-z/L$$
 
@@ -119,3 +119,11 @@ where
 $$W_{LT} = W\left[1 + \left(\frac{2\sqrt{2}W_0}{r_{0T}}\right)^{5/3}\right]^{3/5}$$  (valid only for $H\gg 20$ km )
 
 $$\Lambda_{LT} = \frac{2L}{kW_{LT}^2}$$
+
+### `long_term_spot_radius_UL`
+
+$$ W_{LT} = W \left[ 1 + 4.35 \mu_{2u} \Lambda^{5/6} k^{7/6} L^{5/6} \right]^{3/5} $$
+
+where
+
+$$\mu_{2u} = \int_0^L C_n^2(h)\left( 1 - \frac{z}{L} \right)^{5/3}dz$$

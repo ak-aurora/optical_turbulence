@@ -883,4 +883,51 @@ def scint_index_UL_tracked_gaussian(
     return left + right
 
 
+def long_term_spot_radius_UL(wavelength: real_t,
+                             Lambda: real_t,
+                             rx_spot_size: real_t,
+                             ris_model: Callable[[real_array_t], real_array_t],
+                             altitude_array: real_array_t,
+                             link_array: real_array_t,
+                            **_) -> np.float64:
+    """Calculate the long-term spot radius at a point in the link for an uplink beam.
+    
+    Args:
+        wavelength (real_t): wavelength of the beam sent [m]
+        Lambda (real_t): diffractive parameter of the beam at the receiver plane [unitless]
+        rx_spot_size (real_t): $W$ spot size (effective beam radius) of the beam at the receiver plane [m]
+        ris_model (Callable[[real_array_t], real_array_t]): callable of the refractive-index \
+            structure model that only has one parameter: an array of altitudes [m^{-2/3}].
+        altitude_array (real_array_t): array with altitudes above sea level
+            corresponding to the different link values [m].
+        link_array (real_array_t): distances following the on-axis line from \
+            OGS to satellite. The indices match with the altitude array indices [m].
+        _ (Any): consume all the extra keyword arguments [n/a].
+    
+    Returns:
+        out (np.float64): Long-term spot radius at the receiver [unitless].
+    
+    Source
+        [1] L. C. Andrews and M. Beason, Laser beam propagation in random media: new and advanced topics. \
+        Bellingham, Washington, USA: SPIE Press, 2023.
+    
+    """
+
+    l_distance: real_t = link_array[-1]
+    
+    wavenum_raised = np.pow( 2 * np.pi / wavelength, 7/6)
+    
+    mu_frac = link_array / l_distance
+    
+    mu2u = integrate.simpson(ris_model(altitude_array) * 
+        np.pow( 1 - mu_frac, 5/3 ),
+        link_array
+    )
+
+    vals_to_mult = 4.35 * np.pow( Lambda * l_distance, 5/6 )
+    rhs = np.pow( 1 + vals_to_mult * mu2u * wavenum_raised, 3/5 )
+
+    return np.float64(rx_spot_size * rhs)
+
+
 #endregion UPLINK
