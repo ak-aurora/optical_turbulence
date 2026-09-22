@@ -1,6 +1,6 @@
 [project]
 name = "optical_turbulence"
-version = "1.0.2.dev7"
+version = "1.0.2.dev8"
 description = "Optical turbulence expressions"
 readme = "README.md"
 authors = [
