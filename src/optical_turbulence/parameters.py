@@ -941,7 +941,7 @@ def greenwood_frequency(wavelength: real_t,
                         altitude_array: real_array_t,
                         link_array: real_array_t,
                         **_) -> np.float64:
-    """Calculat.
+    """Calculate the Greenwood frequency for a specific link configuration.
     
     Args:
         wavelength (real_t): wavelength of the beam sent [m]
@@ -976,7 +976,7 @@ def atmospheric_coherence_time(wavelength: real_t,
                         altitude_array: real_array_t,
                         link_array: real_array_t,
                         **_) -> np.float64:
-    """Calculate the long-term spot radius at a point in the link for an uplink beam.
+    """Calculate the atmospheric coherence time for a specific link configuration.
     
     Args:
         wavelength (real_t): wavelength of the beam sent [m]
