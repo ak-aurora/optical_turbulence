@@ -931,3 +931,79 @@ def long_term_spot_radius_UL(wavelength: real_t,
 
 
 #endregion UPLINK
+
+#region INDISTINCTIVE
+# we do not care about the direction
+
+def greenwood_frequency(wavelength: real_t,
+                        wind_model: Callable[[real_array_t], real_array_t],
+                        ris_model: Callable[[real_array_t], real_array_t],
+                        altitude_array: real_array_t,
+                        link_array: real_array_t,
+                        **_) -> np.float64:
+    """Calculat.
+    
+    Args:
+        wavelength (real_t): wavelength of the beam sent [m]
+        wind_model (Callable[[real_array_t], real_array_t]): callable that gives the wind \
+            speed at different altitudes. It has only one param: an array of altitudes [m/s].
+        ris_model (Callable[[real_array_t], real_array_t]): callable of the refractive-index \
+            structure model that only has one parameter: an array of altitudes [m^{-2/3}].
+        altitude_array (real_array_t): array with altitudes above sea level
+            corresponding to the different link values [m].
+        link_array (real_array_t): distances following the on-axis line from \
+            OGS to satellite. The indices match with the altitude array indices [m].
+        _ (Any): consume all the extra keyword arguments [n/a].
+    
+    Returns:
+        out (np.float64): greenwood frequency for the given scenario.
+    
+    Source
+        [1] E. J. Fernandez, Handbook of Adaptive Optics: From Foundations to Applications,\
+            1st ed. Boca Raton: CRC Press, 2024. doi: 10.1201/9781003163671.
+    """
+
+    lhs = 0.102 * np.pow(2 * np.pi / wavelength, 2)
+    in_integral = ris_model(altitude_array) * np.pow(wind_model(altitude_array), 5/3)
+    integral = integrate.simpson(in_integral, link_array)
+
+    return np.float64(np.pow( lhs * integral, 3/5 ))
+
+
+def atmospheric_coherence_time(wavelength: real_t,
+                        wind_model: Callable[[real_array_t], real_array_t],
+                        ris_model: Callable[[real_array_t], real_array_t],
+                        altitude_array: real_array_t,
+                        link_array: real_array_t,
+                        **_) -> np.float64:
+    """Calculate the long-term spot radius at a point in the link for an uplink beam.
+    
+    Args:
+        wavelength (real_t): wavelength of the beam sent [m]
+        wind_model (Callable[[real_array_t], real_array_t]): callable that gives the wind \
+            speed at different altitudes. It has only one param: an array of altitudes [m/s].
+        ris_model (Callable[[real_array_t], real_array_t]): callable of the refractive-index \
+            structure model that only has one parameter: an array of altitudes [m^{-2/3}].
+        altitude_array (real_array_t): array with altitudes above sea level
+            corresponding to the different link values [m].
+        link_array (real_array_t): distances following the on-axis line from \
+            OGS to satellite. The indices match with the altitude array indices [m].
+        _ (Any): consume all the extra keyword arguments [n/a].
+    
+    Returns:
+        out (np.float64): greenwood frequency for the given scenario [Hz].
+    
+    Source
+        [1] E. J. Fernandez, Handbook of Adaptive Optics: From Foundations to Applications,\
+            1st ed. Boca Raton: CRC Press, 2024. doi: 10.1201/9781003163671.
+    """
+
+    fGreenwood = greenwood_frequency(
+        wavelength = wavelength,
+        wind_model = wind_model,
+        ris_model = ris_model,
+        altitude_array = altitude_array,
+        link_array = link_array
+    )
+
+    return 1 / fGreenwood

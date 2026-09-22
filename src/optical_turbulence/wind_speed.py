@@ -38,7 +38,7 @@ def rms_windspeed_bufton(slew_rate: real_t, ground_speed: real_t = 21) -> np.flo
 
     Args:
         slew_rate (real_t): slew rate of the satellite [rad/s]
-        ground_speed (real_t, optional): ground windspeed [m/s]. Defaults to 21 m/s.
+        ground_speed (real_t, optional): ground windspeed [m/s]. Defaults to 8 m/s [3].
 
     Returns:
         windspeed (real_t): rms windspeed.
@@ -47,9 +47,12 @@ def rms_windspeed_bufton(slew_rate: real_t, ground_speed: real_t = 21) -> np.flo
         [1] Laser beam propagation through random media 2 ed.
         [2] L. C. Andrews, Field Guide to Atmospheric Optics, \
             Second Edition, 2nd ed. Bellingham, WA: SPIE, 2019.
-
+        [3] E. J. Fernandez, Handbook of Adaptive Optics: From Foundations to Applications,\
+            1st ed. Boca Raton: CRC Press, 2024. doi: 10.1201/9781003163671.
     """
+
     def _bufton(h):
         return np.pow(bufton_model(h, slew_rate, ground_speed), 2)
+
     integral = integrate.quad(_bufton, 5e3, 20e3)
     return np.sqrt( integral[0] / ( 15e3 ) )
